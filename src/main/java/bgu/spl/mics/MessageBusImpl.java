@@ -4,6 +4,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -12,10 +13,26 @@ import java.util.List;
  * All other methods and members you add the class must be private.
  */
 public class MessageBusImpl implements MessageBus {
-	ConcurrentHashMap<MicroService , BlockingQueue<Event<?>>> microServicesQueues = new ConcurrentHashMap<>();
-	ConcurrentHashMap<Class<? extends Event<?>>,List<MicroService>> eventSubscribers = new ConcurrentHashMap<>();
-	ConcurrentHashMap<Class<? extends Broadcast>,List<MicroService>> broadCastSubscribers = new ConcurrentHashMap<>();
-	ConcurrentHashMap<Event<?> ,Future<?>> futures = new ConcurrentHashMap<>();
+	ConcurrentHashMap<MicroService , BlockingQueue<Message>> microServicesQueues;
+	ConcurrentHashMap<Class<? extends Event<?>>,List<MicroService>> eventSubscribers;
+	ConcurrentHashMap<Class<? extends Broadcast>,List<MicroService>> broadCastSubscribers;
+	ConcurrentHashMap<Event<?> ,Future<?>> futures;
+
+	private static MessageBusImpl instance = null;
+
+	private MessageBusImpl(){
+		ConcurrentHashMap<MicroService , BlockingQueue<Message>> microServicesQueues = new ConcurrentHashMap<>();
+		ConcurrentHashMap<Class<? extends Event<?>>,List<MicroService>> eventSubscribers = new ConcurrentHashMap<>();
+		ConcurrentHashMap<Class<? extends Broadcast>,List<MicroService>> broadCastSubscribers = new ConcurrentHashMap<>();
+		ConcurrentHashMap<Event<?> ,Future<?>> futures = new ConcurrentHashMap<>();
+	}
+
+	public static synchronized MessageBusImpl getInstance() {
+		if (instance == null) {
+			instance = new MessageBusImpl();
+		}
+		return instance;
+	}
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
@@ -29,44 +46,56 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public <T> void complete(Event<T> e, T result) {
-		Future<T> f = futures.get(e);
+		Future f = futures.get(e);
 		f.resolve(result);
 		futures.remove(e);
 	}
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		List subs = broadCastSubscribers.get(b);
+		List<MicroService> subs = broadCastSubscribers.get(b);
 		for(MicroService m : subs){
-			microServicesQueues.get(m).put(b);
+			microServicesQueues.get(m).add(b);
 		}
 	}
 
 	
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-		// TODO Auto-generated method stub
+		List<MicroService> subs = eventSubscribers.get(e);
+		if(!subs.isEmpty()){
+			Future<T> f = new Future<>();
+			MicroService ms = subs.removeFirst();
+			microServicesQueues.get(ms).add(e);
+			subs.add(ms);
+			futures.put(e,f);
+			return f;
+		}
 		return null;
 	}
 
 	@Override
 	public void register(MicroService m) {
-		// TODO Auto-generated method stub
-
+		microServicesQueues.put(m,new LinkedBlockingQueue<>());
 	}
 
 	@Override
-	public void unregister(MicroService m) {
-		// TODO Auto-generated method stub
-
+	public void unregister(MicroService m)
+	{
+		microServicesQueues.remove(m);
+		for(List<MicroService> list : eventSubscribers.values())
+		{
+			list.remove(m);
+		}
+		for(List<MicroService> list : broadCastSubscribers.values())
+		{
+			list.remove(m);
+		}
 	}
 
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException {
-		// TODO Auto-generated method stub
-		return null;
+		Message message = microServicesQueues.get(m).remove();
+		return message;
 	}
-
-	
-
 }
