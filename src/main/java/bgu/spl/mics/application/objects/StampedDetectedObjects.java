@@ -13,6 +13,4 @@ public class StampedDetectedObjects {
         time = T;
         detectedObjectList = list;
     }
-
-
 }
