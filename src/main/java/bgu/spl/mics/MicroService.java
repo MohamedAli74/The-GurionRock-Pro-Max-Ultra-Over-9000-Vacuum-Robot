@@ -1,6 +1,5 @@
 package bgu.spl.mics;
 
-import jdk.vm.ci.code.site.Call;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * message-queue (see {@link MessageBus#register(bgu.spl.mics.MicroService)}
  * method). The abstract MicroService stores this callback together with the
  * type of the message is related to.
- * 
+ *
  * Only private fields and methods may be added to this class.
  * <p>
  */
@@ -160,19 +159,23 @@ public abstract class MicroService implements Runnable {
     @Override
     public final void run() {
         initialize();
-        BlockingQueue q = messageBus.microServicesQueues.get(this);
-        while (!terminated) {
-            if(q.isEmpty()) {
-                try {
-                    q.wait();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+        while (!terminated)
+        {
+            try
+            {
+                Message message = messageBus.awaitMessage(this);
+                Callback callBack = callBacks.get(message.getClass());
+                callBack.call(message);
             }
-            Callback cb = callBacks.get(q.remove());
-            cb.call(new Object());//MOHAEMD: TO EDIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            catch (InterruptedException e)
+            {
+                System.out.println(e);
+            }
+
+
 
         }
+        messageBus.unregister(this);
     }
 
 }
