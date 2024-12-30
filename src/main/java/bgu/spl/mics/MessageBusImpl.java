@@ -18,6 +18,12 @@ public class MessageBusImpl implements MessageBus {
 	ConcurrentHashMap<Class<? extends Broadcast>,List<MicroService>> broadCastSubscribers;
 	ConcurrentHashMap<Event<?> ,Future<?>> futures;
 
+	Object lock1 = new Object();//for the functions: sendEvent unregister
+	Object lock2 = new Object();//for the functions: sendBroadCast unregister
+	Object lock3 = new Object();//for the functions: sendBroadCast awaitMessage
+	Object lock4 = new Object();//for the functions: sendEvent awaitMessage
+
+
 	private static MessageBusImpl instance = null;
 
 	private MessageBusImpl(){
@@ -58,9 +64,18 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public void sendBroadcast(Broadcast b)
 	{
+		synchronized (lock2){
+			synchronized (lock4){
+				List<MicroService> subs = broadCastSubscribers.get(b.getClass());
+				for(MicroService m : subs){
+					microServicesQueues.get(m.getClass()).add(b);
+				}
+				lock3.notifyAll();
+			}
+		}
 		List<MicroService> subs = broadCastSubscribers.get(b.getClass());
 		for(MicroService m : subs){
-			microServicesQueues.get(m).add(b);
+			microServicesQueues.get(m.getClass()).add(b);
 		}
 		//notifyAll();
 	}
@@ -69,18 +84,22 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e)
 	{
-		List<MicroService> subs = eventSubscribers.get(e.getClass());
-		if(!subs.isEmpty())
-		{
-			Future<T> f = new Future<>();
-			MicroService ms = subs.removeFirst();
-			microServicesQueues.get(ms).add(e);
-			subs.add(ms);
-			futures.put(e,f);
-			//notifyAll();
-			return f;
+		synchronized (lock1) {
+			synchronized (lock3) {
+				List<MicroService> subs = eventSubscribers.get(e.getClass());
+				if(!subs.isEmpty())
+				{
+					Future<T> f = new Future<>();
+					MicroService ms = subs.removeFirst();
+					microServicesQueues.get(ms.getClass()).add(e);
+					subs.add(ms);
+					futures.put(e,f);
+					lock3.notifyAll();
+					return f;
+				}
+				return null;
+			}
 		}
-		return null;
 	}
 
 	@Override
@@ -92,32 +111,38 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public void unregister(MicroService m)
 	{
-		microServicesQueues.remove(m);
-		for(List<MicroService> list : eventSubscribers.values())
-		{
-			list.remove(m);
-		}
-		for(List<MicroService> list : broadCastSubscribers.values())
-		{
-			list.remove(m);
+		synchronized (lock1) {
+			synchronized (lock2) {
+				microServicesQueues.remove(m);
+				for (List<MicroService> list : eventSubscribers.values()) {
+					list.remove(m);
+				}
+				for (List<MicroService> list : broadCastSubscribers.values()) {
+					list.remove(m);
+				}
+			}
 		}
 	}
 
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException
 	{
-		while(!microServicesQueues.get(m).isEmpty())
-		{
-			try
-			{
-				wait();
-			}
-			catch (InterruptedException e)
-			{
-				System.out.println(e);
+		synchronized (lock3){
+			synchronized (lock4){
+				while(!microServicesQueues.get(m.getClass()).isEmpty())
+				{
+					try
+					{
+						wait();
+					}
+					catch (InterruptedException e)
+					{
+						System.out.println(e);
+					}
+				}
+				Message message = microServicesQueues.get(m.getClass()).remove();
+				return message;
 			}
 		}
-		Message message = microServicesQueues.get(m).remove();
-		return message;
 	}
 }
