@@ -1,6 +1,8 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.objects.StampedDetectedObjects;
 import bgu.spl.mics.application.objects._Camera;
 
 /**
@@ -12,14 +14,16 @@ import bgu.spl.mics.application.objects._Camera;
  */
 public class CameraService extends MicroService {
 
+    private final _Camera camera;
+
     /**
      * Constructor for CameraService.
      *
      * @param camera The Camera object that this service will use to detect objects.
      */
     public CameraService(_Camera camera) {
-        super("Change_This_Name");
-        // TODO Implement this
+        super("Camera"+camera.getId());
+        this.camera=camera;
     }
 
     /**
@@ -29,6 +33,10 @@ public class CameraService extends MicroService {
      */
     @Override
     protected void initialize() {
-        // TODO Implement this
+        super.subscribeBroadcast(TickBroadcast.class,tickBroadcast ->
+        {
+            int currTime = tickBroadcast.getCurrentTick();
+            StampedDetectedObjects SDO = this
+        });
     }
 }
