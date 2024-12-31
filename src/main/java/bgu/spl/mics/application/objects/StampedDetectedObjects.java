@@ -13,4 +13,12 @@ public class StampedDetectedObjects {
         time = T;
         detectedObjectList = list;
     }
+
+    public List<DetectedObject> getDetectedObjectList() {
+        return detectedObjectList;
+    }
+
+    public int getTime() {
+        return time;
+    }
 }
