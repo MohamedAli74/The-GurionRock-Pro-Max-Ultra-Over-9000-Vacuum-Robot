@@ -8,7 +8,7 @@ import java.util.Vector;
  * It processes DetectObjectsEvents and generates TrackedObjectsEvents by using data from the LiDarDataBase.
  * Each worker tracks objects and sends observations to the FusionSlam service.
  */
-public class _LiDarWorkerTracker {
+public class LiDarWorkerTracker {
 
     private int id;
     private int frequency;
@@ -16,7 +16,7 @@ public class _LiDarWorkerTracker {
     private List<TrackedObject> lastTrackedObjects;
     //TO EDIT!!!!
 
-    public _LiDarWorkerTracker(int id, int frequency){
+    public LiDarWorkerTracker(int id, int frequency){
         this.id = id ;
         this.frequency = frequency ;
         status = STATUS.UP;

@@ -7,14 +7,14 @@ import java.util.Vector;
  * Represents a camera sensor on the robot.
  * Responsible for detecting objects in the environment.
  */
-public class _Camera {
+public class Camera {
     private int id;
     private int frequency;
     private STATUS status;
     private List<StampedDetectedObjects> detectedObjectsList;
     //TO EDIT!!!
 
-    public _Camera(int id, int frequency){
+    public Camera(int id, int frequency){
         this.id = id;
         this.frequency = frequency;
         status = STATUS.UP;

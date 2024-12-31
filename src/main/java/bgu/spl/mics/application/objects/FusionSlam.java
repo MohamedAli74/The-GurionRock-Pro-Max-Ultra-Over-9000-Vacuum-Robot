@@ -8,20 +8,20 @@ import java.util.Vector;
  * Combines data from multiple sensors (e.g., LiDAR, camera) to build and update a global map.
  * Implements the Singleton pattern to ensure a single instance of FusionSlam exists.
  */
-public class _FusionSlam {
+public class FusionSlam {
     private List<LandMark> landMarks;
     private List<Pose> poses;
 
-    private _FusionSlam(){
+    private FusionSlam(){
         this.landMarks = new Vector<LandMark>();//TO EDIT!!!
         this.poses = new Vector<Pose>();//TO EDIT!!!
     }
 
     // Singleton instance holder
     private static class FusionSlamHolder {
-        private static final _FusionSlam INSTANCE = new _FusionSlam();
+        private static final FusionSlam INSTANCE = new FusionSlam();
 
-        public static _FusionSlam getInstance(){
+        public static FusionSlam getInstance(){
             return FusionSlamHolder.INSTANCE;
         }
 

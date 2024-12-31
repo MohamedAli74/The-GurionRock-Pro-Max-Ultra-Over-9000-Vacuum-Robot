@@ -3,10 +3,8 @@ package bgu.spl.mics.application.services;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.CrashedBroadcast;
 import bgu.spl.mics.application.messages.TerminatedBroadcast;
-import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.objects.STATUS;
-import bgu.spl.mics.application.objects.StampedDetectedObjects;
-import bgu.spl.mics.application.objects._Camera;
+import bgu.spl.mics.application.objects.Camera;
 
 /**
  * CameraService is responsible for processing data from the camera and
@@ -17,14 +15,14 @@ import bgu.spl.mics.application.objects._Camera;
  */
 public class CameraService extends MicroService {
 
-    private final _Camera camera;
+    private final Camera camera;
 
     /**
      * Constructor for CameraService.
      *
      * @param camera The Camera object that this service will use to detect objects.
      */
-    public CameraService(_Camera camera) {
+    public CameraService(Camera camera) {
         super("Camera"+camera.getId());
         this.camera=camera;
     }
