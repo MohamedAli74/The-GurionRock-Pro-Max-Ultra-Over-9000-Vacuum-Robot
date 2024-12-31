@@ -12,13 +12,17 @@ public class Camera {
     private int frequency;
     private STATUS status;
     private List<StampedDetectedObjects> detectedObjectsList;
+
+    private List<StampedDetectedObjects> cameraData;
     //TO EDIT!!!
 
-    public Camera(int id, int frequency){
+    public Camera(int id, int frequency,List<StampedDetectedObjects> cameraData){
         this.id = id;
         this.frequency = frequency;
         status = STATUS.UP;
         detectedObjectsList = new Vector<StampedDetectedObjects>();
+
+       this.cameraData=cameraData ;
     }
 
     public int getId() {
@@ -40,4 +44,17 @@ public class Camera {
     public void setStatus(STATUS status) {
         this.status = status;
     }
+
+    public StampedDetectedObjects detect(int time){
+        if(status == STATUS.UP){
+            for(int i = 0;i < cameraData.size() ; i++){
+                if(cameraData.get(i).getTime() == time){
+                    detectedObjectsList.add(cameraData.get(i));
+                    return cameraData.get(i);
+                }
+            }
+        }
+        return null;
+    }
+
 }
