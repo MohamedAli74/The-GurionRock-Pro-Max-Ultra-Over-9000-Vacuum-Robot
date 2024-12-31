@@ -1,7 +1,10 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.CrashedBroadcast;
+import bgu.spl.mics.application.messages.TerminatedBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.objects.STATUS;
 import bgu.spl.mics.application.objects.StampedDetectedObjects;
 import bgu.spl.mics.application.objects._Camera;
 
@@ -33,10 +36,19 @@ public class CameraService extends MicroService {
      */
     @Override
     protected void initialize() {
-        super.subscribeBroadcast(TickBroadcast.class,tickBroadcast ->
+        super.subscribeBroadcast(TerminatedBroadcast.class,terminatedBroadcast ->
         {
-            int currTime = tickBroadcast.getCurrentTick();
-            StampedDetectedObjects SDO = this
+           this.camera.setStatus(STATUS.DOWN);
+           this.terminate();
         });
+
+        super.subscribeBroadcast(CrashedBroadcast.class, crashedBroadcast ->
+        {
+            this.camera.setStatus(STATUS.ERROR);
+            this.terminate();
+        });
+
+        //TO EDIT!!! (subscribe broadcast Tick)
+
     }
 }

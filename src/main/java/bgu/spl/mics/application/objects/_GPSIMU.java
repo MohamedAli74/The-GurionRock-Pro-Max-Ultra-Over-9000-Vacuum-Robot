@@ -30,4 +30,7 @@ public class _GPSIMU {
         return status;
     }
 
+    public void setStatus(STATUS status) {
+        this.status = status;
+    }
 }

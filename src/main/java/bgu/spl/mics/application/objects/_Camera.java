@@ -37,4 +37,7 @@ public class _Camera {
         return status;
     }
 
+    public void setStatus(STATUS status) {
+        this.status = status;
+    }
 }
