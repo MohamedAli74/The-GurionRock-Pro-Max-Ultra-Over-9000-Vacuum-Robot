@@ -5,8 +5,10 @@ import bgu.spl.mics.application.messages.CrashedBroadcast;
 import bgu.spl.mics.application.messages.DetectObjectsEvent;
 import bgu.spl.mics.application.messages.TerminatedBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.objects.DetectedObject;
 import bgu.spl.mics.application.objects.STATUS;
 import bgu.spl.mics.application.objects.LiDarWorkerTracker;
+import bgu.spl.mics.application.objects.TrackedObject;
 
 /**
  * LiDarService is responsible for processing data from the LiDAR sensor and
@@ -50,12 +52,14 @@ public class LiDarService extends MicroService {
 
         super.subscribeEvent(DetectObjectsEvent.class,detectedObjectEvent->
         {
-            //TO EDIT!!!
+            int trackTime;
+            trackTime = Math.max();
+            List<TrackedObject> trackedObjectList = liDar.track(trackTime);
         });
 
         super.subscribeBroadcast(TickBroadcast.class, tickBroadcast ->
         {
-            //TO EDIT!!!
+
         });
 
     }

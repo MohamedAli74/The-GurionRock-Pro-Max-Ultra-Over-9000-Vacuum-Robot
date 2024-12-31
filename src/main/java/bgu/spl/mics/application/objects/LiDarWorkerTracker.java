@@ -14,14 +14,15 @@ public class LiDarWorkerTracker {
     private int frequency;
     private STATUS status;
     private List<TrackedObject> lastTrackedObjects;
-    //TO EDIT!!!!
+    LiDarDataBase dataBase;
 
     public LiDarWorkerTracker(int id, int frequency){
         this.id = id ;
         this.frequency = frequency ;
         status = STATUS.UP;
         lastTrackedObjects = new Vector<TrackedObject>();
-        //TO EDIT!!!
+        String DATA_BASE_FILE_PATH = "example input/lidar_data.json";
+        LiDarDataBase dataBase =LiDarDataBase.getInstance(DATA_BASE_FILE_PATH);
     }
 
     public int getId() {
@@ -42,5 +43,32 @@ public class LiDarWorkerTracker {
 
     public void setStatus(STATUS status) {
         this.status = status;
+    }
+
+    public List<TrackedObject> track(StampedDetectedObjects stampedDetectedObjects){
+        int currentTick = stampedDetectedObjects.getTime();
+        List<TrackedObject> output = null;
+        if(getStatus() == STATUS.UP){
+            output = new Vector<TrackedObject>();
+            List<DetectedObject> detectedObjects = stampedDetectedObjects.getDetectedObjectList();
+            for(DetectedObject detectedObject : detectedObjects){
+                TrackedObject trackedObject = searchInLiDarDataBase(detectedObject.getId());
+                output.add(trackedObject);
+            }
+        }
+        return output;
+    }
+
+    private TrackedObject searchInLiDarDataBase(int id) {
+        int time = -1;
+        List<CloudPoint> coordinates = null;
+        List<StampedCloudPoints> dataBaseList = dataBase.getCloudPoints();
+        for(StampedCloudPoints stampedCloudPoints : dataBaseList){
+            if(stampedCloudPoints.getId() == id){
+                time = stampedCloudPoints.getTime();
+                coordinates = stampedCloudPoints.getCloudPoints();
+            }
+        }
+        return new TrackedObject(id,time,"",coordinates);
     }
 }

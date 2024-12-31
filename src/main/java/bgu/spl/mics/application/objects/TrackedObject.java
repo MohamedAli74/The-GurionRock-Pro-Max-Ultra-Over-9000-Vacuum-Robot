@@ -35,4 +35,8 @@ public class TrackedObject {
     public List<CloudPoint> getCoordintaes() {
         return coordintaes;
     }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

@@ -51,7 +51,7 @@ public class CameraService extends MicroService {
 
         super.subscribeBroadcast(TickBroadcast.class, tickBroadcast ->
         {
-            StampedDetectedObjects detectedObjects = this.camera.detect(tickBroadcast.getCurrentTick());
+            StampedDetectedObjects detectedObjects = this.camera.detect(tickBroadcast.getCurrentTick()- camera.getFrequency());
             if(detectedObjects!=null){
                 this.sendEvent( new DetectObjectsEvent(detectedObjects));
             }
