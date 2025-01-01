@@ -37,6 +37,7 @@ public class CameraService extends MicroService {
      */
     @Override
     protected void initialize() {
+        super.messageBus.register(this);
         super.subscribeBroadcast(TerminatedBroadcast.class,terminatedBroadcast ->
         {
            this.camera.setStatus(STATUS.DOWN);

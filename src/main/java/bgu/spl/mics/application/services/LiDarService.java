@@ -1,14 +1,15 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Future;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.CrashedBroadcast;
-import bgu.spl.mics.application.messages.DetectObjectsEvent;
-import bgu.spl.mics.application.messages.TerminatedBroadcast;
-import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.DetectedObject;
 import bgu.spl.mics.application.objects.STATUS;
 import bgu.spl.mics.application.objects.LiDarWorkerTracker;
 import bgu.spl.mics.application.objects.TrackedObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * LiDarService is responsible for processing data from the LiDAR sensor and
@@ -38,6 +39,7 @@ public class LiDarService extends MicroService {
     @Override
     protected void initialize() {
 
+        super.messageBus.register(this);
         super.subscribeBroadcast(TerminatedBroadcast.class, terminatedBroadcast ->
         {
             this.liDar.setStatus(STATUS.DOWN);
@@ -52,13 +54,24 @@ public class LiDarService extends MicroService {
 
         super.subscribeEvent(DetectObjectsEvent.class,detectedObjectEvent->
         {
-            int trackTime;
-            trackTime = Math.max();
-            List<TrackedObject> trackedObjectList = liDar.track(trackTime);
+            liDar.track(detectedObjectEvent.getStampedDetectedObjects());
+            complete(detectedObjectEvent,true);
         });
 
         super.subscribeBroadcast(TickBroadcast.class, tickBroadcast ->
         {
+            int currentTime = tickBroadcast.getCurrentTick();
+            List<TrackedObject> willSend = new ArrayList<>();
+            for (TrackedObject obj : liDar.getLastTrackedObjects())
+            {
+                if(obj.getTime() <= currentTime - liDar.getFrequency() && !obj.isSentBefore())
+                {
+                    obj.setSentBefore(true);
+                    willSend.add(obj);
+                }
+            }
+            TrackedObjectsEvent trackEvent = new TrackedObjectsEvent(willSend);
+            Future<Boolean> future = super.sendEvent(trackEvent);
 
         });
 

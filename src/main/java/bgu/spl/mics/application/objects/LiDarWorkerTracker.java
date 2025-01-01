@@ -15,6 +15,8 @@ public class LiDarWorkerTracker {
     private STATUS status;
     private List<TrackedObject> lastTrackedObjects;
     LiDarDataBase dataBase;
+    private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
+
 
     public LiDarWorkerTracker(int id, int frequency){
         this.id = id ;
@@ -45,27 +47,26 @@ public class LiDarWorkerTracker {
         this.status = status;
     }
 
-    public List<TrackedObject> track(StampedDetectedObjects stampedDetectedObjects){
-        int currentTick = stampedDetectedObjects.getTime();
-        List<TrackedObject> output = null;
+    public void track(StampedDetectedObjects stampedDetectedObjects){
         if(getStatus() == STATUS.UP){
-            output = new Vector<TrackedObject>();
+
             List<DetectedObject> detectedObjects = stampedDetectedObjects.getDetectedObjectList();
+            int count = 0;
             for(DetectedObject detectedObject : detectedObjects){
-                TrackedObject trackedObject = searchInLiDarDataBase(detectedObject.getId());
-                output.add(trackedObject);
+                TrackedObject trackedObject = searchInLiDarDataBase(detectedObject.getId(),stampedDetectedObjects.getTime());
+                trackedObject.setDescription(detectedObject.getDescription());
+                lastTrackedObjects.add(trackedObject);
+                count++;
             }
+            statisticalFolder.inceaseNumTrackedObjects(count);
         }
-        return output;
     }
 
-    private TrackedObject searchInLiDarDataBase(int id) {
-        int time = -1;
+    private TrackedObject searchInLiDarDataBase(int id,int time) {
         List<CloudPoint> coordinates = null;
         List<StampedCloudPoints> dataBaseList = dataBase.getCloudPoints();
         for(StampedCloudPoints stampedCloudPoints : dataBaseList){
-            if(stampedCloudPoints.getId() == id){
-                time = stampedCloudPoints.getTime();
+            if(stampedCloudPoints.getId() == id && stampedCloudPoints.getTime() == time){
                 coordinates = stampedCloudPoints.getCloudPoints();
             }
         }

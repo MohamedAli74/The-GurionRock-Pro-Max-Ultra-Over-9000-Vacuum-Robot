@@ -28,7 +28,7 @@ public abstract class MicroService implements Runnable {
     private final String name;
 
     ConcurrentHashMap<Class<? extends Message> , Callback<?>> callBacks;
-    MessageBusImpl messageBus;
+    protected MessageBusImpl messageBus;
 
     /**
      * @param name the micro-service name (used mainly for debugging purposes -

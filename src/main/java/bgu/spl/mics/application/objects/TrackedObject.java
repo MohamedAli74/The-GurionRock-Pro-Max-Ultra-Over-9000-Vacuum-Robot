@@ -11,13 +11,19 @@ public class TrackedObject {
     private int id;
     private int time;
     private String description;
-    private List<CloudPoint> coordintaes;
+    private boolean isSentBefore;
+    private List<CloudPoint> coordinates;
 
-    public TrackedObject(int id, int time, String description, List<CloudPoint> coordintaes){
+    public TrackedObject(int id, int time, String description, List<CloudPoint> coordinates
+
+){
         this.id = id;
         this.time = time;
         this.description = description;
-        this.coordintaes = coordintaes;
+        isSentBefore = false;
+        this.coordinates = coordinates
+
+;
     }
 
     public int getId() {
@@ -32,8 +38,17 @@ public class TrackedObject {
         return description;
     }
 
-    public List<CloudPoint> getCoordintaes() {
-        return coordintaes;
+    public boolean isSentBefore() {
+        return isSentBefore;
+    }
+
+    public void setSentBefore(boolean sentBefore)
+    {
+        isSentBefore = sentBefore;
+    }
+
+    public List<CloudPoint> getcoordinates() {
+        return coordinates;
     }
 
     public void setDescription(String description) {

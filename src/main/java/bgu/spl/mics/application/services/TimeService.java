@@ -3,6 +3,7 @@ package bgu.spl.mics.application.services;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TerminatedBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.objects.StatisticalFolder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -15,6 +16,8 @@ public class TimeService extends MicroService {
     private int count;
     private final int tickTime;
     private final int duration;
+    private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
+
 
     /**
      * Constructor for TimeService.
@@ -43,6 +46,9 @@ public class TimeService extends MicroService {
                     //TO EDIT!!!(IMPLEMENT)
                 }
                 count += 1;
+                statisticalFolder.inceaseSystemRuntime(1);
+
+
                 TickBroadcast tickBroadcast = new TickBroadcast(count);
                 super.sendBroadcast(tickBroadcast);
             }

@@ -29,6 +29,7 @@ public class PoseService extends MicroService {
      */
     @Override
     protected void initialize() {
+        super.messageBus.register(this);
         super.subscribeBroadcast(TerminatedBroadcast.class, terminatedBroadcast ->
         {
             this.gpsimu.setStatus(STATUS.DOWN);

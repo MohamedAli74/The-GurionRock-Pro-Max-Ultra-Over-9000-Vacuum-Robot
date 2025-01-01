@@ -15,4 +15,6 @@ public class TrackedObjectsEvent implements Event {
     public List<TrackedObject> getTrackedObjectList(){
         return trackedObjectList;
     }
+
+
 }

@@ -12,8 +12,9 @@ public class Camera {
     private int frequency;
     private STATUS status;
     private List<StampedDetectedObjects> detectedObjectsList;
-
     private List<StampedDetectedObjects> cameraData;
+    private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
+
     //TO EDIT!!!
 
     public Camera(int id, int frequency,List<StampedDetectedObjects> cameraData){
@@ -50,6 +51,7 @@ public class Camera {
             for(int i = 0;i < cameraData.size() ; i++){
                 if(cameraData.get(i).getTime() == time){
                     detectedObjectsList.add(cameraData.get(i));
+                    statisticalFolder.inceaseNumDetectedObjects(cameraData.get(i).getDetectedObjectList().size());
                     return cameraData.get(i);
                 }
             }
