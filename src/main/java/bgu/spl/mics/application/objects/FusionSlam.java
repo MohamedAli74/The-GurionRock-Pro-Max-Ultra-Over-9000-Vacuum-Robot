@@ -13,8 +13,8 @@ public class FusionSlam {
     private List<Pose> poses;
 
     private FusionSlam(){
-        this.landMarks = new Vector<LandMark>();//TO EDIT!!!
-        this.poses = new Vector<Pose>();//TO EDIT!!!
+        this.landMarks = new Vector<LandMark>();
+        this.poses = new Vector<Pose>();
     }
 
     // Singleton instance holder
@@ -32,5 +32,21 @@ public class FusionSlam {
         public List<Pose> getPoses(){
             return INSTANCE.poses;
         }
+
+        private CloudPoint convertLocalPointToGlobalPoint(CloudPoint point, Pose pose) {
+            double xLocal = point.getX();
+            double yLocal = point.getY();
+            double xRobot = pose.getX();
+            double yRobot = pose.getY();
+
+            double yawInRadian = Math.toRadians(pose.getYaw());
+            double cosinYaw = Math.cos(yawInRadian);
+            double sinYaw = Math.sin(yawInRadian);
+            double xGlobal = (cosinYaw * xLocal) - (sinYaw * yLocal) + xRobot;
+            double yGlobal = (sinYaw * xLocal) + (cosinYaw * yLocal) + yRobot;
+
+            return new CloudPoint(xGlobal, yGlobal);
+        }
+
     }
 }

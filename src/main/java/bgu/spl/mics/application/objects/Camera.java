@@ -16,13 +16,13 @@ public class Camera {
     private List<StampedDetectedObjects> cameraData;
     //TO EDIT!!!
 
-    public Camera(int id, int frequency,List<StampedDetectedObjects> cameraData){
+    public Camera(int id, int frequency){
         this.id = id;
         this.frequency = frequency;
         status = STATUS.UP;
         detectedObjectsList = new Vector<StampedDetectedObjects>();
 
-       this.cameraData=cameraData ;
+       this.cameraData=new Vector<StampedDetectedObjects>() ;//will be edited in the main function;
     }
 
     public int getId() {
@@ -43,6 +43,10 @@ public class Camera {
 
     public void setStatus(STATUS status) {
         this.status = status;
+    }
+
+    public void setCameraData(List<StampedDetectedObjects> cameraData) {
+        this.cameraData = cameraData;
     }
 
     public StampedDetectedObjects detect(int time){
