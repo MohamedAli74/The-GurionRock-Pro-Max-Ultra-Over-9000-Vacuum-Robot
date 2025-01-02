@@ -46,11 +46,7 @@ public class FusionSlamService extends MicroService {
         {
             this.terminate();
         });
-
-        super.subscribeBroadcast(TickBroadcast.class,tickBroadcast->
-        {
-
-        });
+        
 
         super.subscribeEvent(TrackedObjectsEvent.class, trackedObjectsEvent->
         {
