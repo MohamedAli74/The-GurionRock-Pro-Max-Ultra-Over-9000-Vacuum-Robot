@@ -13,6 +13,10 @@ public class FusionSlam {
     private List<LandMark> landMarks;
     private List<Pose> poses;
 
+    public static FusionSlam getInstance(){
+        return FusionSlamHolder.getInstance();
+    }
+
     public List<LandMark> getLandMarks(){
         return landMarks;
     }
@@ -81,6 +85,5 @@ public class FusionSlam {
         public static FusionSlam getInstance(){
             return FusionSlamHolder.INSTANCE;
         }
-
     }
 }
