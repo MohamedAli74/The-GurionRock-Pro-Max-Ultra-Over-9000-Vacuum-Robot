@@ -37,5 +37,4 @@ public class Root {
             return lidarConfigurations;
         }
     }
-
 }
