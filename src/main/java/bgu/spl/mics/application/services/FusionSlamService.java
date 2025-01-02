@@ -51,7 +51,8 @@ public class FusionSlamService extends MicroService {
         super.subscribeEvent(TrackedObjectsEvent.class, trackedObjectsEvent->
         {
             for(TrackedObject trackedObject : trackedObjectsEvent.getTrackedObjectList()){
-
+                Pose poseAtTrackingTime = poseForEachTick.get(trackedObject.getTime());
+                fusionSlam.updatePos(trackedObject,poseAtTrackingTime);
             }
         });
 
