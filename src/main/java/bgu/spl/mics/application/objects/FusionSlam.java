@@ -25,28 +25,5 @@ public class FusionSlam {
             return FusionSlamHolder.INSTANCE;
         }
 
-        public List<LandMark> getLandMarks(){
-            return INSTANCE.landMarks;
-        }
-
-        public List<Pose> getPoses(){
-            return INSTANCE.poses;
-        }
-
-        private CloudPoint convertLocalPointToGlobalPoint(CloudPoint point, Pose pose) {
-            double xLocal = point.getX();
-            double yLocal = point.getY();
-            double xRobot = pose.getX();
-            double yRobot = pose.getY();
-
-            double yawInRadian = Math.toRadians(pose.getYaw());
-            double cosinYaw = Math.cos(yawInRadian);
-            double sinYaw = Math.sin(yawInRadian);
-            double xGlobal = (cosinYaw * xLocal) - (sinYaw * yLocal) + xRobot;
-            double yGlobal = (sinYaw * xLocal) + (cosinYaw * yLocal) + yRobot;
-
-            return new CloudPoint(xGlobal, yGlobal);
-        }
-
     }
 }
