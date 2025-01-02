@@ -15,8 +15,6 @@ public class Camera {
     private List<StampedDetectedObjects> cameraData;
     private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
 
-    //TO EDIT!!!
-
     public Camera(int id, int frequency){
         this.id = id;
         this.frequency = frequency;
