@@ -1,6 +1,8 @@
 package bgu.spl.mics;
 
 
+import bgu.spl.mics.application.services.TimeService;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -144,6 +146,15 @@ public abstract class MicroService implements Runnable {
         this.terminated = true;
     }
 
+    public boolean isTerminated()
+    {
+        return terminated;
+    }
+
+    public void setTerminated(boolean terminated) {
+        this.terminated = terminated;
+    }
+
     /**
      * @return the name of the service - the service name is given to it in the
      *         construction time and is used mainly for debugging purposes.
@@ -159,21 +170,20 @@ public abstract class MicroService implements Runnable {
     @Override
     public final void run() {
         initialize();
-        while (!terminated)
-        {
-            try
-            {
-                Message message = messageBus.awaitMessage(this);
-                Callback callBack = callBacks.get(message.getClass());
-                callBack.call(message);
+        while (!terminated) {
+            if (this.getClass() != TimeService.class) {
+                try {
+                    Message message = messageBus.awaitMessage(this);
+                    Callback callBack = callBacks.get(message.getClass());
+                    callBack.call(message);
+                } catch (InterruptedException e) {
+                    System.out.println(e);
+                }
             }
-            catch (InterruptedException e)
+            else
             {
-                System.out.println(e);
+                ((TimeService) this).overrided();
             }
-
-
-
         }
         messageBus.unregister(this);
     }

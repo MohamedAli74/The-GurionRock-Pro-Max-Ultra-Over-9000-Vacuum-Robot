@@ -38,23 +38,24 @@ public class TimeService extends MicroService {
      */
     @Override
     protected void initialize() {
-        Thread TimeServiceThread = new Thread(()->
-        {   while(count<duration){
-                try {
-                    TimeUnit.SECONDS.sleep(this.tickTime);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                count += 1;
-                statisticalFolder.inceaseSystemRuntime(1);
-
-
-                TickBroadcast tickBroadcast = new TickBroadcast(count);
-                super.sendBroadcast(tickBroadcast);
+       super.messageBus.register(this);
+    }
+    public void overrided()
+    {
+        while(count<duration){
+            try {
+                TimeUnit.SECONDS.sleep(this.tickTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            super.sendBroadcast(new TerminatedBroadcast());
-            super.terminate();
-        });
-        TimeServiceThread.start();
+            count += 1;
+            statisticalFolder.inceaseSystemRuntime(1);
+
+
+            TickBroadcast tickBroadcast = new TickBroadcast(count);
+            super.sendBroadcast(tickBroadcast);
+        }
+        super.sendBroadcast(new TerminatedBroadcast());
+        super.terminate();
     }
 }

@@ -15,13 +15,13 @@ public class Camera {
     private List<StampedDetectedObjects> cameraData;
     private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
 
-    public Camera(int id, int frequency){
+    public Camera(int id, int frequency) {
         this.id = id;
         this.frequency = frequency;
         status = STATUS.UP;
         detectedObjectsList = new Vector<StampedDetectedObjects>();
 
-       this.cameraData=new Vector<StampedDetectedObjects>() ;//will be edited in the main function;
+        this.cameraData = new Vector<StampedDetectedObjects>();//will be edited in the main function;
     }
 
     public int getId() {
@@ -48,17 +48,30 @@ public class Camera {
         this.cameraData = cameraData;
     }
 
-    public StampedDetectedObjects detect(int time){
-        if(status == STATUS.UP){
-            for(int i = 0;i < cameraData.size() ; i++){
-                if(cameraData.get(i).getTime() == time){
+    public StampedDetectedObjects detect(int time) {
+        if (status == STATUS.UP) {
+            for (int i = 0; i < cameraData.size(); i++) {
+                if (cameraData.get(i).getTime() == time) {
                     detectedObjectsList.add(cameraData.get(i));
                     statisticalFolder.inceaseNumDetectedObjects(cameraData.get(i).getDetectedObjectList().size());
                     return cameraData.get(i);
                 }
             }
+
         }
         return null;
+    }
+
+    public boolean checkERROR(int time) {
+        for (int i = 0; i < cameraData.size(); i++) {
+            if (cameraData.get(i).getTime() == time) {
+                for(DetectedObject d : cameraData.get(i).getDetectedObjectList()){
+                    if(d.getId()=="ERROR")
+                        return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

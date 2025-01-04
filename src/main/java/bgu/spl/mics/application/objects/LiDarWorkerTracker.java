@@ -49,7 +49,6 @@ public class LiDarWorkerTracker {
 
     public void track(StampedDetectedObjects stampedDetectedObjects){
         if(getStatus() == STATUS.UP){
-
             List<DetectedObject> detectedObjects = stampedDetectedObjects.getDetectedObjectList();
             int count = 0;
             for(DetectedObject detectedObject : detectedObjects){
@@ -62,7 +61,7 @@ public class LiDarWorkerTracker {
         }
     }
 
-    private TrackedObject searchInLiDarDataBase(Integer id,int time) {
+    private TrackedObject searchInLiDarDataBase(String id,int time) {
         List<CloudPoint> coordinates = null;
         List<StampedCloudPoints> dataBaseList = dataBase.getCloudPoints();
         for(StampedCloudPoints stampedCloudPoints : dataBaseList){
@@ -72,4 +71,16 @@ public class LiDarWorkerTracker {
         }
         return new TrackedObject(id.toString(),time,"",coordinates);
     }
+
+    public boolean checkERROR(int time) {
+        for (int i = 0; i < dataBase.getCloudPoints().size(); i++) {
+            if (dataBase.getCloudPoints().get(i).getTime() == time) {
+                if(dataBase.getCloudPoints().get(i).getId()=="ERROR"){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

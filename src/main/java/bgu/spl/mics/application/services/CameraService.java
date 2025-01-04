@@ -5,6 +5,7 @@ import bgu.spl.mics.application.messages.CrashedBroadcast;
 import bgu.spl.mics.application.messages.DetectObjectsEvent;
 import bgu.spl.mics.application.messages.TerminatedBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.objects.DetectedObject;
 import bgu.spl.mics.application.objects.STATUS;
 import bgu.spl.mics.application.objects.Camera;
 import bgu.spl.mics.application.objects.StampedDetectedObjects;
@@ -19,6 +20,7 @@ import bgu.spl.mics.application.objects.StampedDetectedObjects;
 public class CameraService extends MicroService {
 
     private final Camera camera;
+    private DetectedObject lastFrame;
 
     /**
      * Constructor for CameraService.
@@ -52,9 +54,14 @@ public class CameraService extends MicroService {
 
         super.subscribeBroadcast(TickBroadcast.class, tickBroadcast ->
         {
-            StampedDetectedObjects detectedObjects = this.camera.detect(tickBroadcast.getCurrentTick()- camera.getFrequency());
+            if(camera.checkERROR(tickBroadcast.getCurrentTick())){
+                sendBroadcast(new CrashedBroadcast());
+                //TO EDIT;
+            }
+            StampedDetectedObjects detectedObjects = this.camera.detect(tickBroadcast.getCurrentTick()-camera.getFrequency());
             if(detectedObjects!=null){
-                this.sendEvent( new DetectObjectsEvent(detectedObjects));
+                    lastFrame = detectedObjects.getDetectedObjectList().getLast();
+                    this.sendEvent( new DetectObjectsEvent(detectedObjects));
             }
         });
 
