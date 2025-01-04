@@ -8,25 +8,23 @@ import java.util.List;
  * time of tracking, and coordinates in the environment.
  */
 public class TrackedObject {
-    private int id;
+    private String id;
     private int time;
     private String description;
-    private boolean isSentBefore;
     private List<CloudPoint> coordinates;
+    private boolean isSentBefore;
 
-    public TrackedObject(int id, int time, String description, List<CloudPoint> coordinates
+    public TrackedObject(String id, int time, String description, List<CloudPoint> coordinates
 
 ){
         this.id = id;
         this.time = time;
         this.description = description;
+        this.coordinates = coordinates;
         isSentBefore = false;
-        this.coordinates = coordinates
-
-;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 

@@ -62,7 +62,7 @@ public class LiDarWorkerTracker {
         }
     }
 
-    private TrackedObject searchInLiDarDataBase(int id,int time) {
+    private TrackedObject searchInLiDarDataBase(Integer id,int time) {
         List<CloudPoint> coordinates = null;
         List<StampedCloudPoints> dataBaseList = dataBase.getCloudPoints();
         for(StampedCloudPoints stampedCloudPoints : dataBaseList){
@@ -70,6 +70,6 @@ public class LiDarWorkerTracker {
                 coordinates = stampedCloudPoints.getCloudPoints();
             }
         }
-        return new TrackedObject(id,time,"",coordinates);
+        return new TrackedObject(id.toString(),time,"",coordinates);
     }
 }
