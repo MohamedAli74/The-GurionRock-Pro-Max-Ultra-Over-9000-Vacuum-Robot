@@ -43,7 +43,7 @@ public class TimeService extends MicroService {
                 try {
                     TimeUnit.SECONDS.sleep(this.tickTime);
                 } catch (InterruptedException e) {
-                    //TO EDIT!!!(IMPLEMENT)
+                    e.printStackTrace();
                 }
                 count += 1;
                 statisticalFolder.inceaseSystemRuntime(1);

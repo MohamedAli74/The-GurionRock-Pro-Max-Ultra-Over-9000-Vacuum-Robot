@@ -19,9 +19,9 @@ public class GPSIMU {
     private List<Pose> PoseList;
 
     public GPSIMU(String PATH_TO_FILE){
-        currentTick = 0; //NOT SURE
+        currentTick = 0;
         status = STATUS.UP;
-        PoseList = read(PATH_TO_FILE);//TO EDIT!!!
+        PoseList = read(PATH_TO_FILE);
     }
 
     public int getCurrentTick() {
