@@ -12,6 +12,7 @@ import java.util.Vector;
 public class FusionSlam {
     private List<LandMark> landMarks;
     private List<Pose> poses;
+    private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
 
     private FusionSlam(){
         this.landMarks = new Vector<LandMark>();
@@ -35,6 +36,11 @@ public class FusionSlam {
         }
         return null;
     }
+
+    public static FusionSlam getInstance(){
+        return FusionSlamHolder.INSTANCE;
+    }
+
     public List<CloudPoint> convertLocalPointsToGlobalPoints(List<CloudPoint> coordinates, Pose pose)
     {
         List<CloudPoint> output = new ArrayList<>();
@@ -86,6 +92,10 @@ public class FusionSlam {
         return new CloudPoint((cloudPoint1.getX()+cloudPoint2.getX())/2.0,(cloudPoint1.getY()+cloudPoint2.getY())/2.0);
     }
 
+    public StatisticalFolder getStatisticalFolder() {
+        return statisticalFolder;
+    }
+
     // Singleton instance holder
     public static class FusionSlamHolder {
         private static final FusionSlam INSTANCE = new FusionSlam();
@@ -93,6 +103,5 @@ public class FusionSlam {
         public static FusionSlam getInstance(){
             return FusionSlamHolder.INSTANCE;
         }
-
     }
 }

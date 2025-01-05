@@ -21,7 +21,6 @@ public class CameraService extends MicroService {
 
     private final Camera camera;
     private DetectedObject lastFrame;
-
     /**
      * Constructor for CameraService.
      *
@@ -56,14 +55,22 @@ public class CameraService extends MicroService {
         {
             if(camera.checkERROR(tickBroadcast.getCurrentTick())){
                 sendBroadcast(new CrashedBroadcast());
-                //TO EDIT;
             }
             StampedDetectedObjects detectedObjects = this.camera.detect(tickBroadcast.getCurrentTick()-camera.getFrequency());
             if(detectedObjects!=null){
-                    lastFrame = detectedObjects.getDetectedObjectList().getLast();
+                    setLastFrame(detectedObjects.getDetectedObjectList().getLast());
                     this.sendEvent( new DetectObjectsEvent(detectedObjects));
             }
         });
 
     }
+
+    public void setLastFrame(DetectedObject lastFrame) {
+        this.lastFrame = lastFrame;
+    }
+
+    public DetectedObject getLastFrame() {
+        return lastFrame;
+    }
+
 }

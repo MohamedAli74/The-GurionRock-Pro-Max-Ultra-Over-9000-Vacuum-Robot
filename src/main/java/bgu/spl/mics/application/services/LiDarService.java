@@ -80,4 +80,8 @@ public class LiDarService extends MicroService {
         });
 
     }
+
+    public TrackedObject getLastFrame() {
+        return liDar.getLastFrame();
+    }
 }
