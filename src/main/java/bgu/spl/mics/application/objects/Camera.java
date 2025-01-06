@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.objects;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -48,12 +49,18 @@ public class Camera {
         this.cameraData = cameraData;
     }
 
+    public void StatisticalFolder() {
+        this.statisticalFolder = StatisticalFolder.getInstance();
+    }
+
+    public void setDetectedObjectsList(ArrayList<StampedDetectedObjects> detectedObjectsList) {this.detectedObjectsList=detectedObjectsList;}
+
     public StampedDetectedObjects detect(int time) {
         if (status == STATUS.UP) {
             for (int i = 0; i < cameraData.size(); i++) {
                 if (cameraData.get(i).getTime() == time) {
                     detectedObjectsList.add(cameraData.get(i));
-                    statisticalFolder.inceaseNumDetectedObjects(cameraData.get(i).getDetectedObjectList().size());
+                    statisticalFolder.inceaseNumDetectedObjects(cameraData.get(i).getDetectedObjects().size());
                     return cameraData.get(i);
                 }
             }
@@ -65,7 +72,7 @@ public class Camera {
     public boolean checkERROR(int time) {
         for (int i = 0; i < cameraData.size(); i++) {
             if (cameraData.get(i).getTime() == time) {
-                for(DetectedObject d : cameraData.get(i).getDetectedObjectList()){
+                for(DetectedObject d : cameraData.get(i).getDetectedObjects()){
                     if(d.getId()=="ERROR")
                         return true;
                 }
@@ -78,6 +85,6 @@ public class Camera {
     public List<StampedDetectedObjects> getCameraData() {
         return cameraData;
     }
-    //delete this
 
+    //delete this
 }

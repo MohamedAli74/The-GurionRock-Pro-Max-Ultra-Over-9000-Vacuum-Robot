@@ -23,8 +23,6 @@ public class LiDarWorkerTracker {
         this.frequency = frequency ;
         status = STATUS.UP;
         lastTrackedObjects = new Vector<TrackedObject>();
-        String DATA_BASE_FILE_PATH = "example input/lidar_data.json";
-        LiDarDataBase dataBase =LiDarDataBase.getInstance(DATA_BASE_FILE_PATH);
     }
 
     public int getId() {
@@ -47,9 +45,17 @@ public class LiDarWorkerTracker {
         this.status = status;
     }
 
+    public void setLastTrackedObjects(List<TrackedObject> lastTrackedObjects) {
+        this.lastTrackedObjects = lastTrackedObjects;
+    }
+
+    public void DataBase() {
+        this.dataBase = LiDarDataBase.getInstance("DATABASE INSTANCE INITIALIZED");
+    }
+
     public void track(StampedDetectedObjects stampedDetectedObjects){
         if(getStatus() == STATUS.UP){
-            List<DetectedObject> detectedObjects = stampedDetectedObjects.getDetectedObjectList();
+            List<DetectedObject> detectedObjects = stampedDetectedObjects.getDetectedObjects();
             int count = 0;
             for(DetectedObject detectedObject : detectedObjects){
                 TrackedObject trackedObject = searchInLiDarDataBase(detectedObject.getId(),stampedDetectedObjects.getTime());
@@ -85,5 +91,9 @@ public class LiDarWorkerTracker {
 
     public TrackedObject getLastFrame() {
         return lastTrackedObjects.get(lastTrackedObjects.size());
+    }
+
+    public void StatisticalFolder() {
+       this.statisticalFolder = StatisticalFolder.getInstance();
     }
 }

@@ -37,4 +37,35 @@ public class Root {
             return LidarConfigurations;
         }
     }
+
+    public class StampedCloudPointsJSON{
+        private int time;
+        private String id;
+        private List<List<Double>> cloudPoints;
+
+        public int getTime() {
+            return time;
+        }
+
+        public void setTime(int time) {
+            this.time = time;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public List<List<Double>> getCloudPoints() {
+            return cloudPoints;
+        }
+
+        public void setCloudPoints(List<List<Double>> cloudPoints) {
+            this.cloudPoints = cloudPoints;
+        }
+    }
+
 }

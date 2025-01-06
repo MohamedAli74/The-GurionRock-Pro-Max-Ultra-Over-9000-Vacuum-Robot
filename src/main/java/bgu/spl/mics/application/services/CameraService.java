@@ -59,7 +59,7 @@ public class CameraService extends MicroService {
             }
             StampedDetectedObjects detectedObjects = this.camera.detect(tickBroadcast.getCurrentTick()-camera.getFrequency());
             if(detectedObjects!=null){
-                    setLastFrame(detectedObjects.getDetectedObjectList().get(detectedObjects.getDetectedObjectList().size()));
+                    setLastFrame(detectedObjects.getDetectedObjects().get(detectedObjects.getDetectedObjects().size()));
                     this.sendEvent( new DetectObjectsEvent(detectedObjects));
             }
         });

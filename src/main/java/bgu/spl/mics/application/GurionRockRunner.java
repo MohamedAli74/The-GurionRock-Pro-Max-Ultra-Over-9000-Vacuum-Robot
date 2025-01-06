@@ -51,12 +51,20 @@ public class GurionRockRunner {
             List<CameraService> CameraServiceList = new ArrayList<CameraService>();
             for (Camera c : root.Cameras.getCamerasConfigurations()) {
                 c.setCameraData(cameraDatas.get("camera"+c.getId()));
+                c.setStatus(STATUS.UP);
+                c.setDetectedObjectsList(new ArrayList<StampedDetectedObjects>());
+                c.StatisticalFolder();
                 CameraServiceList.add(new CameraService(c));
             }
 
             List<LiDarService> LidarServices = new ArrayList<LiDarService>();
-            System.out.println(root.LidarWorkers.getLidars_data_path());
+            LiDarDataBase dataBase = LiDarDataBase.getInstance("example_input/" +root.LidarWorkers.getLidars_data_path().substring(0));
+                                                //TO EDIT!!!
             for (LiDarWorkerTracker lidar : root.LidarWorkers.getLidarConfigurations()) {
+                lidar.setStatus(STATUS.UP);
+                lidar.setLastTrackedObjects(new ArrayList<>());
+                lidar.DataBase();
+                lidar.StatisticalFolder();
                 LidarServices.add(new LiDarService(lidar));
             }
 
@@ -79,50 +87,19 @@ public class GurionRockRunner {
             }
             Thread poseServiceThread = new Thread(poseService);
             Thread fusionSlamServiceThread = new Thread(fusionSlamService);
-            TimeService timeService = new TimeService(root.TickTime, root.Duration);
             poseServiceThread.start();
             fusionSlamServiceThread.start();
-            try {
-                poseServiceThread.join();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            try {
-                fusionSlamServiceThread.join();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            Thread timeServiceThread = new Thread(timeService);
-            timeServiceThread.start();
-            try {
-                timeServiceThread.join();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
 
-            for (Thread thread : cameraThreads) {
-                try {
-                    thread.join();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt(); // Restore interrupt status
-                    System.err.println("Camera thread interrupted: " + e.getMessage());
-                }
-            }
-
-            for (Thread thread : lidarThreads) {
-                try {
-                    thread.join();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt(); // Restore interrupt status
-                    System.err.println("Lidar thread interrupted: " + e.getMessage());
-                }
-            }
 
             CrasherService crasherService = new CrasherService();
             Thread crasherThread = new Thread(crasherService);
             crasherThread.start();
+
+            TimeService timeService = new TimeService(root.TickTime, root.Duration);
+            Thread timeServiceThread = new Thread(timeService);
+            timeServiceThread.start();
             try {
-                crasherThread.join();
+                timeServiceThread.join();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

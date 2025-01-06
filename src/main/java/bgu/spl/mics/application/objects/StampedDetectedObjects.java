@@ -7,15 +7,15 @@ import java.util.List;
  */
 public class StampedDetectedObjects {
     private int time;
-    private List<DetectedObject> detectedObjectList;
+    private List<DetectedObject> detectedObjects;
 
     public StampedDetectedObjects(int T , List<DetectedObject> list ){
         time = T;
-        detectedObjectList = list;
+        detectedObjects = list;
     }
 
-    public List<DetectedObject> getDetectedObjectList() {
-        return detectedObjectList;
+    public List<DetectedObject> getDetectedObjects() {
+        return detectedObjects;
     }
 
     public int getTime() {
