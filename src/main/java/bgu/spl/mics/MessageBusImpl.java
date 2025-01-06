@@ -27,10 +27,10 @@ public class MessageBusImpl implements MessageBus {
 	private static MessageBusImpl instance = null;
 
 	private MessageBusImpl(){
-		ConcurrentHashMap<MicroService , BlockingQueue<Message>> microServicesQueues = new ConcurrentHashMap<>();
-		ConcurrentHashMap<Class<? extends Event<?>>,List<MicroService>> eventSubscribers = new ConcurrentHashMap<>();
-		ConcurrentHashMap<Class<? extends Broadcast>,List<MicroService>> broadCastSubscribers = new ConcurrentHashMap<>();
-		ConcurrentHashMap<Event<?> ,Future<?>> futures = new ConcurrentHashMap<>();
+		this.microServicesQueues = new ConcurrentHashMap<>();
+		this.eventSubscribers = new ConcurrentHashMap<>();
+		this.broadCastSubscribers = new ConcurrentHashMap<>();
+		this.futures = new ConcurrentHashMap<>();
 	}
 
 	public static synchronized MessageBusImpl getInstance()
@@ -44,12 +44,14 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m)
 	{
+		eventSubscribers.computeIfAbsent(type, k -> new ArrayList<>());
 		eventSubscribers.get(type).add(m);
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m)
 	{
+		broadCastSubscribers.computeIfAbsent(type, k -> new ArrayList<>());
 		broadCastSubscribers.get(type).add(m);
 	}
 
@@ -68,14 +70,14 @@ public class MessageBusImpl implements MessageBus {
 			synchronized (lock4){
 				List<MicroService> subs = broadCastSubscribers.get(b.getClass());
 				for(MicroService m : subs){
-					microServicesQueues.get(m.getClass()).add(b);
+					microServicesQueues.get(m).add(b);
 				}
 				lock3.notifyAll();
 			}
 		}
 		List<MicroService> subs = broadCastSubscribers.get(b.getClass());
 		for(MicroService m : subs){
-			microServicesQueues.get(m.getClass()).add(b);
+			microServicesQueues.get(m).add(b);
 		}
 		//notifyAll();
 	}
@@ -90,8 +92,8 @@ public class MessageBusImpl implements MessageBus {
 				if(!subs.isEmpty())
 				{
 					Future<T> f = new Future<>();
-					MicroService ms = subs.removeFirst();
-					microServicesQueues.get(ms.getClass()).add(e);
+					MicroService ms = subs.remove(0);
+					microServicesQueues.get(ms).add(e);
 					subs.add(ms);
 					futures.put(e,f);
 					lock3.notifyAll();
@@ -129,7 +131,7 @@ public class MessageBusImpl implements MessageBus {
 	{
 		synchronized (lock3){
 			synchronized (lock4){
-				while(!microServicesQueues.get(m.getClass()).isEmpty())
+				while(!microServicesQueues.get(m).isEmpty())
 				{
 					try
 					{
@@ -140,7 +142,7 @@ public class MessageBusImpl implements MessageBus {
 						System.out.println(e);
 					}
 				}
-				Message message = microServicesQueues.get(m.getClass()).remove();
+				Message message = microServicesQueues.get(m).take();
 				return message;
 			}
 		}

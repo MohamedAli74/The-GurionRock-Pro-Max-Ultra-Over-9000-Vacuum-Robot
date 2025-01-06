@@ -1,17 +1,19 @@
 package bgu.spl.mics.application;
 
+import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.application.objects.*;
 import bgu.spl.mics.application.services.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.google.gson.reflect.TypeToken;
-import jdk.internal.foreign.CABI;
+//import com.google.gson.reflect.TypeToken;
+//import jdk.internal.foreign.CABI;
 
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -32,29 +34,35 @@ public class GurionRockRunner {
      */
     public static void main(String[] args) {
         Gson gson = new Gson();
+        MessageBusImpl messageBus = MessageBusImpl.getInstance();
         try {
-            FileReader configReader = new FileReader(args[1]);
+            FileReader configReader = new FileReader(args[0]);
             Root root = gson.fromJson(configReader, Root.class);
-            FileReader cameraDataReader = new FileReader(root.Cameras.cameraDatasPath);
-
-            Type listType = new TypeToken<List<List<StampedDetectedObjects>>>() {
-            }.getType();
-            List<List<StampedDetectedObjects>> cameraDatas = gson.fromJson(cameraDataReader, listType);
-            ;
+//            System.out.println(root.Cameras.getCamera_datas_path());
+//            System.out.println(args[0]);
+//            for(int i=0; i<root.Cameras.getCamerasConfigurations().size() ; i++){
+//                System.out.println(root.Cameras.getCamerasConfigurations().get(i).getId());
+//            }
+            FileReader cameraDataReader = new FileReader("example_input/" +root.Cameras.camera_datas_path.substring(0));
+                                            //TO EDIT!!!
+            Type listType = new TypeToken<Map<String, List<StampedDetectedObjects>>>() {}.getType();
+            Map<String, List<StampedDetectedObjects>> cameraDatas = gson.fromJson(cameraDataReader, listType);
 
             List<CameraService> CameraServiceList = new ArrayList<CameraService>();
             for (Camera c : root.Cameras.getCamerasConfigurations()) {
-                c.setCameraData(cameraDatas.get(c.getId()));
+                c.setCameraData(cameraDatas.get("camera"+c.getId()));
                 CameraServiceList.add(new CameraService(c));
             }
 
             List<LiDarService> LidarServices = new ArrayList<LiDarService>();
+            System.out.println(root.LidarWorkers.getLidars_data_path());
             for (LiDarWorkerTracker lidar : root.LidarWorkers.getLidarConfigurations()) {
                 LidarServices.add(new LiDarService(lidar));
             }
 
 
-            GPSIMU gpsimu = new GPSIMU(root.PoseJsonFile);
+            GPSIMU gpsimu = new GPSIMU("example_input/" +root.poseJsonFile.substring(0));
+                                            //TO EDIT!!!
             PoseService poseService = new PoseService(gpsimu);
 
             FusionSlamService fusionSlamService = new FusionSlamService(FusionSlam.getInstance());
@@ -62,7 +70,7 @@ public class GurionRockRunner {
             List<Thread> cameraThreads = new ArrayList<>();
             List<Thread> lidarThreads = new ArrayList<>();
             for (int i = 0; i < CameraServiceList.size(); i++){
-                cameraThreads.set(i, new Thread(CameraServiceList.get(i)));
+                cameraThreads.add(new Thread(CameraServiceList.get(i)));
                 cameraThreads.get(i).start();
             }
             for (int i = 0; i < LidarServices.size(); i++) {
@@ -119,7 +127,7 @@ public class GurionRockRunner {
                 throw new RuntimeException(e);
             }
 
-            File configFile = new File(args[1]);
+            File configFile = new File(args[0]);
             if(crasherService.isCrashed()){
                 errorOutput(configFile.getParent(),crasherService);
             }
@@ -284,8 +292,6 @@ public class GurionRockRunner {
             public void setWorld_Map(List<LandMark> world_Map) {
             World_Map = world_Map;
         }
-
-
     }
 
 }

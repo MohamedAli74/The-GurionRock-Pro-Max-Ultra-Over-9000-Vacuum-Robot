@@ -63,7 +63,6 @@ public class LiDarService extends MicroService {
             int currentTime = tickBroadcast.getCurrentTick();
             if(liDar.checkERROR(currentTime)){
                 sendBroadcast(new CrashedBroadcast());
-                //TO EDIT!!!
             }
             List<TrackedObject> willSend = new ArrayList<>();
             for (TrackedObject obj : liDar.getLastTrackedObjects())

@@ -74,4 +74,10 @@ public class Camera {
         return false;
     }
 
+    //for debugging:
+    public List<StampedDetectedObjects> getCameraData() {
+        return cameraData;
+    }
+    //delete this
+
 }

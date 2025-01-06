@@ -84,6 +84,6 @@ public class LiDarWorkerTracker {
     }
 
     public TrackedObject getLastFrame() {
-        return lastTrackedObjects.getLast();
+        return lastTrackedObjects.get(lastTrackedObjects.size());
     }
 }
