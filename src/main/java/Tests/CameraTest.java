@@ -1,15 +1,9 @@
-package bgu.spl.mics;
-import bgu.spl.mics.*;
+package Tests;
 import bgu.spl.mics.application.objects.*;
-import bgu.spl.mics.example.messages.ExampleBroadcast;
-import bgu.spl.mics.example.messages.ExampleEvent;
-import bgu.spl.mics.example.services.ExampleBroadcastListenerService;
-import bgu.spl.mics.example.services.ExampleEventHandlerService;
-import bgu.spl.mics.example.services.ExampleMessageSenderService;
 import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
+
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertNotNull;
 

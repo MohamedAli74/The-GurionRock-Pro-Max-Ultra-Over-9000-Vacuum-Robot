@@ -1,3 +1,5 @@
+package Tests;
+
 import bgu.spl.mics.*;
 import bgu.spl.mics.example.messages.ExampleBroadcast;
 import bgu.spl.mics.example.messages.ExampleEvent;
