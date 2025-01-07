@@ -73,5 +73,12 @@ public class Camera {
         }
         return false;
     }
+    ///////////////////////////getters for test://////////////////////////////
+    public List<StampedDetectedObjects> getCameraData() {
+        return cameraData;
+    }
 
+    public StatisticalFolder getStatisticalFolder() {
+        return statisticalFolder;
+    }
 }

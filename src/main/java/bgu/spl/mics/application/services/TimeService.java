@@ -42,7 +42,8 @@ public class TimeService extends MicroService {
     }
     public void overrided()
     {
-        while(count<duration){
+        while(count<duration)
+        {
             try {
                 TimeUnit.SECONDS.sleep(this.tickTime);
             } catch (InterruptedException e) {

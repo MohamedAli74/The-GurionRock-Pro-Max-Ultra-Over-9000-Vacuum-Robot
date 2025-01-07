@@ -9,8 +9,8 @@ public class StampedDetectedObjects {
     private int time;
     private List<DetectedObject> detectedObjectList;
 
-    public StampedDetectedObjects(int T , List<DetectedObject> list ){
-        time = T;
+    public StampedDetectedObjects(int time , List<DetectedObject> list ){
+        this.time = time;
         detectedObjectList = list;
     }
 

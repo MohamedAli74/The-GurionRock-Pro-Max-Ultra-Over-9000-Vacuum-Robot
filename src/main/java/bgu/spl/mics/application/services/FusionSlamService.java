@@ -58,6 +58,8 @@ public class FusionSlamService extends MicroService {
                 else
                 {
                     LandMark newLandMark = new LandMark(trackedObject.getId(),trackedObject.getDescription(),fusionSlam.newCoordinates(landMark.getCoordinates(),fusionSlam.convertLocalPointsToGlobalPoints(trackedObject.getcoordinates(),fusionSlam.getPose(trackedObject.getTime()))));
+                    fusionSlam.getLandMarks().add(newLandMark);
+                    fusionSlam.getStatisticalFolder().inceaseNumLandmarks(1);
                 }
 
             }
@@ -67,5 +69,9 @@ public class FusionSlamService extends MicroService {
         {
             fusionSlam.getPoseslist().add(poseEvent.getCurrentPose());
         });
+    }
+
+    public FusionSlam getFusionSlam() {
+        return fusionSlam;
     }
 }

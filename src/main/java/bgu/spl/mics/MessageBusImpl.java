@@ -145,4 +145,20 @@ public class MessageBusImpl implements MessageBus {
 			}
 		}
 	}
+
+	public ConcurrentHashMap<Class<? extends Broadcast>, List<MicroService>> getBroadCastSubscribers() {
+		return broadCastSubscribers;
+	}
+
+	public ConcurrentHashMap<Class<? extends Event<?>>, List<MicroService>> getEventSubscribers() {
+		return eventSubscribers;
+	}
+
+	public ConcurrentHashMap<Event<?>, Future<?>> getFutures() {
+		return futures;
+	}
+
+	public ConcurrentHashMap<MicroService, BlockingQueue<Message>> getMicroServicesQueues() {
+		return microServicesQueues;
+	}
 }
