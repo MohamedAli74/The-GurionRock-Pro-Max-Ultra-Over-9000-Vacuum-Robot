@@ -47,6 +47,6 @@ public class CameraTest
         assertNotNull("detect function must have not null output ",stObject);
         assertEquals("output's time must be equal to time in the input ",time,stObject.getTime());
         assertTrue("this data have to be contained in the camera data list " ,camera.getCameraData().contains(stObject));
-        assertEquals("num of detected objects in statistical folder must be increased by output's list size ",numAfter-numBefore,stObject.getDetectedObjectList().size());
+        assertEquals("num of detected objects in statistical folder must be increased by output's list size ",numAfter-numBefore,stObject.getDetectedObjects().size());
     }
 }

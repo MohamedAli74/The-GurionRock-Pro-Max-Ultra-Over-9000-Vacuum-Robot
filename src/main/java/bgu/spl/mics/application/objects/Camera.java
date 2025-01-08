@@ -54,8 +54,8 @@ public class Camera {
             for (int i = 0; i < cameraData.size(); i++) {
                 if (cameraData.get(i).getTime() == time) {
                     detectedObjectsList.add(cameraData.get(i));
-                    if(cameraData.get(i).getDetectedObjectList() != null)
-                        statisticalFolder.inceaseNumDetectedObjects(cameraData.get(i).getDetectedObjectList().size());
+                    if(cameraData.get(i).getDetectedObjects() != null)
+                        statisticalFolder.inceaseNumDetectedObjects(cameraData.get(i).getDetectedObjects().size());
                     return cameraData.get(i);
                 }
             }
@@ -68,7 +68,7 @@ public class Camera {
         for (int i = 0; i < cameraData.size(); i++) {
             if (cameraData.get(i).getTime() == time) {
                 if (cameraData.get(i).getDetectedObjects() != null) {
-                    for (DetectedObject d : cameraData.get(i).getDetectedObjectList()) {
+                    for (DetectedObject d : cameraData.get(i).getDetectedObjects()) {
                         if (d.getId() == "ERROR")
                             return true;
                     }

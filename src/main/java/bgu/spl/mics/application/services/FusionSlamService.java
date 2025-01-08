@@ -53,7 +53,11 @@ public class FusionSlamService extends MicroService {
                 LandMark landMark = fusionSlam.CheckLandMark(trackedObject);
                 if (landMark == null)
                 {
-                    landMark = new LandMark(trackedObject.getId(),trackedObject.getDescription(),fusionSlam.convertLocalPointsToGlobalPoints(trackedObject.getcoordinates(),fusionSlam.getPose(trackedObject.getTime())));
+
+                    landMark = new LandMark(
+                            trackedObject.getId(),
+                            trackedObject.getDescription(),
+                            fusionSlam.convertLocalPointsToGlobalPoints(trackedObject.getcoordinates(), fusionSlam.getPose(trackedObject.getTime())));
                     fusionSlam.getLandMarks().add(landMark);
                 }
                 else
