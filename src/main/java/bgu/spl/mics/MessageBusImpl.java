@@ -4,6 +4,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -13,10 +14,10 @@ import java.util.concurrent.LinkedBlockingQueue;
  * All other methods and members you add the class must be private.
  */
 public class MessageBusImpl implements MessageBus {
-	ConcurrentHashMap<MicroService , BlockingQueue<Message>> microServicesQueues;
-	ConcurrentHashMap<Class<? extends Event<?>>,List<MicroService>> eventSubscribers;
-	ConcurrentHashMap<Class<? extends Broadcast>,List<MicroService>> broadCastSubscribers;
-	ConcurrentHashMap<Event<?> ,Future<?>> futures;
+	ConcurrentHashMap<MicroService, BlockingQueue<Message>> microServicesQueues;
+	ConcurrentHashMap<Class<? extends Event<?>>, List<MicroService>> eventSubscribers;
+	ConcurrentHashMap<Class<? extends Broadcast>, List<MicroService>> broadCastSubscribers;
+	ConcurrentHashMap<Event<?>, Future<?>> futures;
 
 	Object lock1 = new Object();//for the functions: sendEvent unregister
 	Object lock2 = new Object();//for the functions: sendBroadCast unregister
@@ -26,15 +27,14 @@ public class MessageBusImpl implements MessageBus {
 
 	private static MessageBusImpl instance = null;
 
-	private MessageBusImpl(){
+	private MessageBusImpl() {
 		this.microServicesQueues = new ConcurrentHashMap<>();
 		this.eventSubscribers = new ConcurrentHashMap<>();
 		this.broadCastSubscribers = new ConcurrentHashMap<>();
 		this.futures = new ConcurrentHashMap<>();
 	}
 
-	public static synchronized MessageBusImpl getInstance()
-	{
+	public static MessageBusImpl getInstance() {
 		if (instance == null) {
 			instance = new MessageBusImpl();
 		}
@@ -42,66 +42,75 @@ public class MessageBusImpl implements MessageBus {
 	}
 
 	@Override
-	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m)
-	{
+	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
 		eventSubscribers.computeIfAbsent(type, k -> new ArrayList<>());
-		eventSubscribers.get(type).add(m);
+		synchronized (type) {
+			eventSubscribers.get(type).add(m);
+		}
 	}
 
 	@Override
-	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m)
-	{
+	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
 		broadCastSubscribers.computeIfAbsent(type, k -> new ArrayList<>());
-		broadCastSubscribers.get(type).add(m);
+		synchronized (type) {
+			broadCastSubscribers.get(type).add(m);
+		}
+
 	}
 
 	@Override
-	public <T> void complete(Event<T> e, T result)
-	{
+	public <T> void complete(Event<T> e, T result) {
 		Future f = futures.get(e);
 		f.resolve(result);
 		futures.remove(e);
 	}
 
 	@Override
-	public void sendBroadcast(Broadcast b)
-	{
-		synchronized (lock2){
-			synchronized (lock4){
-				List<MicroService> subs = broadCastSubscribers.get(b.getClass());
-				for(MicroService m : subs){
-					microServicesQueues.get(m).add(b);
+	public void sendBroadcast(Broadcast b) {
+		synchronized (b.getClass()) {
+			if (broadCastSubscribers.contains(b.getClass())) {
+				for (MicroService m : broadCastSubscribers.get(b.getClass())) {
+					BlockingQueue<Message> queue = microServicesQueues.get(m);
+					if (queue != null)
+					{
+						queue.add(b);
+					}
 				}
-				lock3.notifyAll();
 			}
 		}
-		List<MicroService> subs = broadCastSubscribers.get(b.getClass());
-		for(MicroService m : subs){
-			microServicesQueues.get(m).add(b);
 		}
-		//notifyAll();
-	}
+
 
 
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e)
 	{
-		synchronized (lock1) {
-			synchronized (lock3) {
-				List<MicroService> subs = eventSubscribers.get(e.getClass());
-				if(!subs.isEmpty())
-				{
-					Future<T> f = new Future<>();
-					MicroService ms = subs.remove(0);
-					microServicesQueues.get(ms).add(e);
-					subs.add(ms);
-					futures.put(e,f);
-					lock3.notifyAll();
-					return f;
-				}
+		MicroService m;
+		Future<T> future = new Future<>();
+		synchronized (e.getClass()) {
+			if (eventSubscribers.get(e.getClass()) == null || !eventSubscribers.containsKey(e.getClass())) {
 				return null;
 			}
+			futures.put(e, future);
+			List<MicroService> list = eventSubscribers.get(e.getClass());
+			if (list == null) {//if no queue then no one has registered to it yet, or already unregistered
+				return null;
+			}
+			m = list.remove(0);
+			if (m == null) {
+				return null;
+			}
+			list.add(m);
 		}
+
+		synchronized (m) {
+			BlockingQueue<Message> queue = microServicesQueues.get(m);
+			if (queue == null) {
+				return null;
+			}
+			queue.add(e);
+		}
+		return future;
 	}
 
 	@Override
@@ -113,14 +122,34 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public void unregister(MicroService m)
 	{
-		synchronized (lock1) {
-			synchronized (lock2) {
-				microServicesQueues.remove(m);
-				for (List<MicroService> list : eventSubscribers.values()) {
-					list.remove(m);
+		if (microServicesQueues.containsKey(m)) {
+			BlockingQueue<Message> q;
+			synchronized (m) {
+				for (Class<? extends Broadcast> type : broadCastSubscribers.keySet()) {
+					synchronized (type) {
+						broadCastSubscribers.get(type).remove(m);
+					}
 				}
-				for (List<MicroService> list : broadCastSubscribers.values()) {
-					list.remove(m);
+
+				for (Class<? extends Event> type : eventSubscribers.keySet()) {
+					synchronized (type) {
+						eventSubscribers.get(type).remove(m);
+					}
+				}
+
+				q = microServicesQueues.remove(m);
+
+				if (q == null) {
+					return;
+				}
+			}
+			while (!q.isEmpty()) {
+				Message message = q.poll();
+				if (message != null) {
+					Future<?> future = futures.get(message);
+					if (future != null) {
+						future.resolve(null);
+					}
 				}
 			}
 		}
@@ -129,23 +158,19 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException
 	{
-		synchronized (lock3){
-			synchronized (lock4){
-				while(!microServicesQueues.get(m).isEmpty())
-				{
-					try
-					{
-						wait();
-					}
-					catch (InterruptedException e)
-					{
-						System.out.println(e);
-					}
-				}
-				Message message = microServicesQueues.get(m).take();
-				return message;
+		BlockingQueue<Message> queue = microServicesQueues.get(m);
+		if (queue == null) {
+			throw new IllegalArgumentException("MicroService is not registered!");
+		}
+		Message msg = null;
+		synchronized (queue) {
+			try {
+				msg = queue.take();
+			} catch (InterruptedException e) {
+				System.out.println(e);
 			}
 		}
+		return msg;
 	}
 
 	public ConcurrentHashMap<Class<? extends Broadcast>, List<MicroService>> getBroadCastSubscribers() {

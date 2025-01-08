@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.objects;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -80,5 +81,12 @@ public class Camera {
 
     public StatisticalFolder getStatisticalFolder() {
         return statisticalFolder;
+    }
+
+    public void setDetectedObjectsList(ArrayList<StampedDetectedObjects> stampedDetectedObjects) {
+
+    }
+
+    public void StatisticalFolder() {
     }
 }
