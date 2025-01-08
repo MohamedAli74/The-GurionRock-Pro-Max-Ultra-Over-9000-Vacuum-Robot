@@ -54,7 +54,8 @@ public class Camera {
             for (int i = 0; i < cameraData.size(); i++) {
                 if (cameraData.get(i).getTime() == time) {
                     detectedObjectsList.add(cameraData.get(i));
-                    statisticalFolder.inceaseNumDetectedObjects(cameraData.get(i).getDetectedObjectList().size());
+                    if(cameraData.get(i).getDetectedObjectList() != null)
+                        statisticalFolder.inceaseNumDetectedObjects(cameraData.get(i).getDetectedObjectList().size());
                     return cameraData.get(i);
                 }
             }
@@ -66,9 +67,11 @@ public class Camera {
     public boolean checkERROR(int time) {
         for (int i = 0; i < cameraData.size(); i++) {
             if (cameraData.get(i).getTime() == time) {
-                for(DetectedObject d : cameraData.get(i).getDetectedObjectList()){
-                    if(d.getId()=="ERROR")
-                        return true;
+                if (cameraData.get(i).getDetectedObjects() != null) {
+                    for (DetectedObject d : cameraData.get(i).getDetectedObjectList()) {
+                        if (d.getId() == "ERROR")
+                            return true;
+                    }
                 }
             }
         }
@@ -83,10 +86,10 @@ public class Camera {
         return statisticalFolder;
     }
 
-    public void setDetectedObjectsList(ArrayList<StampedDetectedObjects> stampedDetectedObjects) {
-
-    }
-
     public void StatisticalFolder() {
+        this.statisticalFolder = StatisticalFolder.getInstance();
+    }
+    public void setDetectedObjectsList(ArrayList<StampedDetectedObjects> detctedObjectsList) {
+        this.detectedObjectsList=detctedObjectsList;
     }
 }

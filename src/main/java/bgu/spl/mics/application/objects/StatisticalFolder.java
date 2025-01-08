@@ -50,8 +50,8 @@ public class StatisticalFolder {
         do {
             oldVal = getSystemRuntime();
             newval = oldVal + time;
+            System.out.println("System Runtime increased to: " + systemRuntime.get());
         } while (!systemRuntime.compareAndSet(oldVal, newval));
-
     }
 
     public void inceaseNumDetectedObjects(int num) {
@@ -60,6 +60,7 @@ public class StatisticalFolder {
         do {
             oldVal = getNumDetectedObjects();
             newval = oldVal + num;
+            System.out.println("Number of Detected Objects increased to: " + numDetectedObjects.get());
         } while (!numDetectedObjects.compareAndSet(oldVal, newval));
     }
 
@@ -69,18 +70,17 @@ public class StatisticalFolder {
         do {
             oldVal = getNumTrackedObjects();
             newval = oldVal + num;
+            System.out.println("Number of Tracked Objects increased to: " + numTrackedObjects.get());
         } while (!numTrackedObjects.compareAndSet(oldVal, newval));
     }
 
-
-    public void inceaseNumLandmarks(int num)
-    {
+    public void inceaseNumLandmarks(int num) {
         int oldVal;
         int newval;
-        do
-        {
+        do {
             oldVal = getNumLandmarks();
             newval = oldVal + num;
-        }while (!numLandmarks.compareAndSet(oldVal,newval));
+            System.out.println("Number of Landmarks increased to: " + numLandmarks.get());
+        } while (!numLandmarks.compareAndSet(oldVal, newval));
     }
 }

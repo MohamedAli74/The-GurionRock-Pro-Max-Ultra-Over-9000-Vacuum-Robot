@@ -19,11 +19,6 @@ public class MessageBusImpl implements MessageBus {
 	ConcurrentHashMap<Class<? extends Broadcast>, List<MicroService>> broadCastSubscribers;
 	ConcurrentHashMap<Event<?>, Future<?>> futures;
 
-	Object lock1 = new Object();//for the functions: sendEvent unregister
-	Object lock2 = new Object();//for the functions: sendBroadCast unregister
-	Object lock3 = new Object();//for the functions: sendBroadCast awaitMessage
-	Object lock4 = new Object();//for the functions: sendEvent awaitMessage
-
 
 	private static MessageBusImpl instance = null;
 
@@ -68,7 +63,7 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	public void sendBroadcast(Broadcast b) {
 		synchronized (b.getClass()) {
-			if (broadCastSubscribers.contains(b.getClass())) {
+			if (broadCastSubscribers.containsKey(b.getClass())) {
 				for (MicroService m : broadCastSubscribers.get(b.getClass())) {
 					BlockingQueue<Message> queue = microServicesQueues.get(m);
 					if (queue != null)

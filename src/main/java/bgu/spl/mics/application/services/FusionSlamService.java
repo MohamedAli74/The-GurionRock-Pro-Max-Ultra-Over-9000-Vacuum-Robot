@@ -34,6 +34,7 @@ public class FusionSlamService extends MicroService {
      */
     @Override
     protected void initialize() {
+        messageBus.register(this);
         super.subscribeBroadcast(TerminatedBroadcast.class, terminatedBroadcast ->
         {
             this.terminate();
