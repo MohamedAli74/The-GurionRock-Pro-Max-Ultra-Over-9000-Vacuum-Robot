@@ -101,7 +101,7 @@ public class LiDarWorkerTracker {
         for (int i = 0; i < dataBase.getCloudPoints().size(); i++) {
             if (dataBase.getCloudPoints().get(i).getTime() == time) {
                 if(dataBase.getCloudPoints().get(i).getId().equals("ERROR")){
-                    output = new CrashedBroadcast("TO EDIT",faultySensor);
+                    output = new CrashedBroadcast("Error in LiDarService, at the " + time + " tick",faultySensor);
                 }
             }
         }
