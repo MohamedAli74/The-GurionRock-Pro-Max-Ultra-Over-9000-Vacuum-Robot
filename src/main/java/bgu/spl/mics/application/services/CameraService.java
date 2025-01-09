@@ -55,14 +55,18 @@ public class CameraService extends MicroService {
         super.subscribeBroadcast(TickBroadcast.class, tickBroadcast ->
         {
             if(camera.checkERROR(tickBroadcast.getCurrentTick())){
-                sendBroadcast(new CrashedBroadcast());
+                CrashedBroadcast crashedBroadcast = camera.getCrashedBroadcast(tickBroadcast.getCurrentTick(),this);
+                sendBroadcast(crashedBroadcast);
             }
             StampedDetectedObjects detectedObjects = this.camera.detect(tickBroadcast.getCurrentTick()-camera.getFrequency());
             if(detectedObjects!=null) {
-                if (detectedObjects.getDetectedObjects() != null) {
+                if (detectedObjects.getDetectedObjects() != null && detectedObjects.getDetectedObjects().size()!=0) {
                     setLastFrame(detectedObjects.getDetectedObjects().get(detectedObjects.getDetectedObjects().size()-1));
                     this.sendEvent(new DetectObjectsEvent(detectedObjects));
                 }
+            }
+            else{
+                System.out.println("entered the else");
             }
         });
 
@@ -75,10 +79,4 @@ public class CameraService extends MicroService {
     public DetectedObject getLastFrame() {
         return lastFrame;
     }
-
-    //for debugging:
-    public Camera getCamera() {
-        return camera;
-    }
-    //delete this
 }

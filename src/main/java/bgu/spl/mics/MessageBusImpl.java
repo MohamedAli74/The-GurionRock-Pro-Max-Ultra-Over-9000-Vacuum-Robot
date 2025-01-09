@@ -1,4 +1,10 @@
 package bgu.spl.mics;
+import bgu.spl.mics.application.messages.PoseEvent;
+import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.objects.StatisticalFolder;
+import bgu.spl.mics.application.services.CameraService;
+import bgu.spl.mics.application.services.FusionSlamService;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.ArrayList;
@@ -65,6 +71,9 @@ public class MessageBusImpl implements MessageBus {
 		synchronized (b.getClass()) {
 			if (broadCastSubscribers.containsKey(b.getClass())) {
 				for (MicroService m : broadCastSubscribers.get(b.getClass())) {
+//					if(m.getClass()== CameraService.class && b.getClass()== TickBroadcast.class){
+//						System.out.print(" ");
+//					}
 					BlockingQueue<Message> queue = microServicesQueues.get(m);
 					if (queue != null)
 					{

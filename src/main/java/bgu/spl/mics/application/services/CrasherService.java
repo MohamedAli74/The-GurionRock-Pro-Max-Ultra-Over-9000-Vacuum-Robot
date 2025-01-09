@@ -1,10 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.CrashedBroadcast;
-import bgu.spl.mics.application.messages.PoseEvent;
-import bgu.spl.mics.application.messages.TerminatedBroadcast;
-import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.*;
 
 import java.util.ArrayList;
@@ -30,21 +27,23 @@ public class CrasherService extends MicroService {
         super.messageBus.register(this);
         subscribeBroadcast(CrashedBroadcast.class, crashedBroadcast ->
         {
-            crashed = true;
-            Error = crashedBroadcast.getDescription();
-            faultySensor = crashedBroadcast.getFaultySensor();
-            if(faultySensor.getClass() == CameraService.class){
-                flag = 1;
-                lastFrameCamera = ((CameraService)faultySensor).getLastFrame();
-                lastFrameLidar = null ;
-            }else{
-                if(faultySensor.getClass() == LiDarService.class){
-                    flag = -1;
-                    lastFrameLidar = ((LiDarService)faultySensor).getLastFrame();
-                    lastFrameCamera = null;
+            synchronized (messageBus) {
+                crashed = true;
+                Error = crashedBroadcast.getDescription();
+                faultySensor = crashedBroadcast.getFaultySensor();
+                if (faultySensor.getClass() == CameraService.class) {
+                    flag = 1;
+                    lastFrameCamera = ((CameraService) faultySensor).getLastFrame();
+                    lastFrameLidar = null;
+                } else {
+                    if (faultySensor.getClass() == LiDarService.class) {
+                        flag = -1;
+                        lastFrameLidar = ((LiDarService) faultySensor).getLastFrame();
+                        lastFrameCamera = null;
+                    }
                 }
+                terminate();
             }
-            terminate();
         });
 
         subscribeBroadcast(TerminatedBroadcast.class, terminatedBroadcast ->
@@ -52,7 +51,7 @@ public class CrasherService extends MicroService {
             terminate();
         });
 
-        subscribeEvent(PoseEvent.class,poseEvent ->
+        subscribeEvent(FusionSlamToCrasherEvent.class, poseEvent ->
         {
            posesUntilCrash.add(poseEvent.getCurrentPose());
         });

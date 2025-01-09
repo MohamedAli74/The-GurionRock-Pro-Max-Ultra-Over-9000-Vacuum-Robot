@@ -7,6 +7,11 @@ public class CrashedBroadcast implements Broadcast {
     private String description;
     private MicroService faultySensor;
 
+    public CrashedBroadcast(String description,MicroService faultySensor){
+        this.description=description;
+        this.faultySensor=faultySensor;
+    }
+
     public String getDescription() {
         return description;
     }

@@ -38,11 +38,6 @@ public class GurionRockRunner {
         try {
             FileReader configReader = new FileReader(args[0]);
             Root root = gson.fromJson(configReader, Root.class);
-//            System.out.println(root.Cameras.getCamera_datas_path());
-//            System.out.println(args[0]);
-//            for(int i=0; i<root.Cameras.getCamerasConfigurations().size() ; i++){
-//                System.out.println(root.Cameras.getCamerasConfigurations().get(i).getId());
-//            }
             FileReader cameraDataReader = new FileReader("example_input/" +root.Cameras.camera_datas_path.substring(0));
                                             //TO EDIT!!!
             Type listType = new TypeToken<Map<String, List<StampedDetectedObjects>>>() {}.getType();
@@ -74,6 +69,8 @@ public class GurionRockRunner {
             PoseService poseService = new PoseService(gpsimu);
 
             FusionSlamService fusionSlamService = new FusionSlamService(FusionSlam.getInstance());
+            fusionSlamService.setWaitingFor(
+                    root.Cameras.getCamerasConfigurations().size()+root.LidarWorkers.getLidarConfigurations().size());
 
             List<Thread> cameraThreads = new ArrayList<>();
             List<Thread> lidarThreads = new ArrayList<>();

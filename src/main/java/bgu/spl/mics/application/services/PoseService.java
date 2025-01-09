@@ -46,8 +46,9 @@ public class PoseService extends MicroService {
         {
             Pose currentPose = null;
             for(Pose p : gpsimu.getPoseList()){
-                if(p.getTime() == tickBroadcast.getCurrentTick())
+                if(p.getTime() == tickBroadcast.getCurrentTick()) {
                     currentPose=p;
+                }
             }
             super.sendEvent(new PoseEvent(currentPose));
         });

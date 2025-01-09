@@ -39,11 +39,18 @@ public class TimeService extends MicroService {
     @Override
     protected void initialize() {
        super.messageBus.register(this);
+       super.subscribeBroadcast(TerminatedBroadcast.class, terminatedBroadcast ->
+       {
+           terminate();
+       });
     }
     public void overrided()
     {
-        while(count<duration)
+        while(!isTerminated())
         {
+            if(!messageBus.getMicroServicesQueues().get(this).isEmpty()) {
+                terminate();
+            }
             try {
                 TimeUnit.SECONDS.sleep(this.tickTime);
             } catch (InterruptedException e) {
@@ -51,12 +58,8 @@ public class TimeService extends MicroService {
             }
             count += 1;
             statisticalFolder.inceaseSystemRuntime(1);
-
-
             TickBroadcast tickBroadcast = new TickBroadcast(count);
             super.sendBroadcast(tickBroadcast);
         }
-        super.sendBroadcast(new TerminatedBroadcast());
-        super.terminate();
     }
 }

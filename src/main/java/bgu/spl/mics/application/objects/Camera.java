@@ -1,5 +1,8 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.application.messages.CrashedBroadcast;
+import bgu.spl.mics.application.services.CameraService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -69,7 +72,7 @@ public class Camera {
             if (cameraData.get(i).getTime() == time) {
                 if (cameraData.get(i).getDetectedObjects() != null) {
                     for (DetectedObject d : cameraData.get(i).getDetectedObjects()) {
-                        if (d.getId() == "ERROR")
+                        if (d.getId().equals("ERROR"))
                             return true;
                     }
                 }
@@ -77,6 +80,22 @@ public class Camera {
         }
         return false;
     }
+
+    public CrashedBroadcast getCrashedBroadcast(int time, CameraService faultySensor){
+        CrashedBroadcast output=null;
+        for (int i = 0; i < cameraData.size(); i++) {
+            if (cameraData.get(i).getTime() == time) {
+                if (cameraData.get(i).getDetectedObjects() != null) {
+                    for (DetectedObject d : cameraData.get(i).getDetectedObjects()) {
+                        if (d.getId().equals("ERROR"))
+                            output = new CrashedBroadcast(d.description,faultySensor);
+                    }
+                }
+            }
+        }
+        return output;
+    }
+
     ///////////////////////////getters for test://////////////////////////////
     public List<StampedDetectedObjects> getCameraData() {
         return cameraData;

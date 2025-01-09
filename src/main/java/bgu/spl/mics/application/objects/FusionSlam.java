@@ -1,5 +1,7 @@
 package bgu.spl.mics.application.objects;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -52,6 +54,7 @@ public class FusionSlam {
     }
 
     public CloudPoint convert(CloudPoint point, Pose pose) {
+        Gson gson = new Gson();
         double xLocal = point.getX();
         double yLocal = point.getY();
         double xRobot = pose.getX();
@@ -69,7 +72,7 @@ public class FusionSlam {
     {
         for (LandMark landMark : landMarks)
         {
-            if (landMark.getId() == trackedObject.getId())
+            if (landMark.getId().equals(trackedObject.getId()))
             {
                 landMarks.remove(landMark);
                 return landMark;
@@ -78,13 +81,17 @@ public class FusionSlam {
         }
         return null;
     }
-    public List<CloudPoint> newCoordinates(List<CloudPoint> coordinates1,List<CloudPoint> coordinates2)
+    public List<CloudPoint> newCoordinates(List<CloudPoint> alreadyCalculated,List<CloudPoint> newScanned)
     {
         List<CloudPoint> output = new ArrayList<>();
-        for(int i=0;i<coordinates1.size();i++)
+        int i;
+        for(i=0;i<alreadyCalculated.size()&i<newScanned.size();i++)
         {
-            output.add(getAverage(coordinates1.get(i),coordinates2.get(i)));
+            output.add(getAverage(alreadyCalculated.get(i),newScanned.get(i)));
         }
+        if(i<newScanned.size())
+            for(;i<newScanned.size();i++)
+                output.add(newScanned.get(i));
         return output;
     }
     public CloudPoint getAverage(CloudPoint cloudPoint1,CloudPoint cloudPoint2)

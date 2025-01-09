@@ -1,5 +1,8 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.application.messages.CrashedBroadcast;
+import bgu.spl.mics.application.services.LiDarService;
+
 import java.util.List;
 import java.util.Vector;
 
@@ -71,7 +74,7 @@ public class LiDarWorkerTracker {
         List<CloudPoint> coordinates = null;
         List<StampedCloudPoints> dataBaseList = dataBase.getCloudPoints();
         for(StampedCloudPoints stampedCloudPoints : dataBaseList){
-            if(stampedCloudPoints.getId() == id && stampedCloudPoints.getTime() == time){
+            if(stampedCloudPoints.getId().equals(id) && stampedCloudPoints.getTime() == time){
                 coordinates = stampedCloudPoints.getCloudPoints();
             }
         }
@@ -81,12 +84,24 @@ public class LiDarWorkerTracker {
     public boolean checkERROR(int time) {
         for (int i = 0; i < dataBase.getCloudPoints().size(); i++) {
             if (dataBase.getCloudPoints().get(i).getTime() == time) {
-                if(dataBase.getCloudPoints().get(i).getId()=="ERROR"){
+                if(dataBase.getCloudPoints().get(i).getId().equals("ERROR")){
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    public CrashedBroadcast getCrashedbroadcast(int time, LiDarService faultySensor){
+        CrashedBroadcast output = null;
+        for (int i = 0; i < dataBase.getCloudPoints().size(); i++) {
+            if (dataBase.getCloudPoints().get(i).getTime() == time) {
+                if(dataBase.getCloudPoints().get(i).getId().equals("ERROR")){
+                    output = new CrashedBroadcast("TO EDIT",faultySensor);
+                }
+            }
+        }
+        return output;
     }
 
     public TrackedObject getLastFrame() {
