@@ -12,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,9 +38,11 @@ public class GurionRockRunner {
         MessageBusImpl messageBus = MessageBusImpl.getInstance();
         try {
             FileReader configReader = new FileReader(args[0]);
+            File toFindParent = new File(args[0]);
+
             Root root = gson.fromJson(configReader, Root.class);
-            FileReader cameraDataReader = new FileReader("example_input/" +root.Cameras.camera_datas_path.substring(0));
-                                            //TO EDIT!!!
+
+            FileReader cameraDataReader = new FileReader(toFindParent.getParent()+ File.separator +root.Cameras.camera_datas_path.substring(0));
             Type listType = new TypeToken<Map<String, List<StampedDetectedObjects>>>() {}.getType();
             Map<String, List<StampedDetectedObjects>> cameraDatas = gson.fromJson(cameraDataReader, listType);
 
@@ -49,23 +52,35 @@ public class GurionRockRunner {
                 c.setStatus(STATUS.UP);
                 c.setDetectedObjectsList(new ArrayList<StampedDetectedObjects>());
                 c.StatisticalFolder();
+                int max=0;
+                for(StampedDetectedObjects s : c.getCameraData()){
+                    if(s.getTime()>max){
+                        max=s.getTime();
+                    }
+                }
+                c.setMaxTick(max);
                 CameraServiceList.add(new CameraService(c));
             }
 
             List<LiDarService> LidarServices = new ArrayList<LiDarService>();
-            LiDarDataBase dataBase = LiDarDataBase.getInstance("example_input/" +root.LidarWorkers.getLidars_data_path().substring(0));
-                                                //TO EDIT!!!
+            LiDarDataBase dataBase = LiDarDataBase.getInstance(toFindParent.getParent()+ File.separator +root.LidarWorkers.getLidars_data_path().substring(0));
+            int max=0;
+            for(StampedCloudPoints s : dataBase.getCloudPoints()){
+                if(s.getTime()>max){
+                    max=s.getTime();
+                }
+            }
             for (LiDarWorkerTracker lidar : root.LidarWorkers.getLidarConfigurations()) {
                 lidar.setStatus(STATUS.UP);
                 lidar.setLastTrackedObjects(new ArrayList<>());
                 lidar.DataBase();
                 lidar.StatisticalFolder();
+                lidar.setMaxTick(max);
                 LidarServices.add(new LiDarService(lidar));
             }
 
 
-            GPSIMU gpsimu = new GPSIMU("example_input/" +root.poseJsonFile.substring(0));
-                                            //TO EDIT!!!
+            GPSIMU gpsimu = new GPSIMU(toFindParent.getParent()+ File.separator+root.poseJsonFile.substring(0));
             PoseService poseService = new PoseService(gpsimu);
 
             FusionSlamService fusionSlamService = new FusionSlamService(FusionSlam.getInstance());
@@ -103,7 +118,7 @@ public class GurionRockRunner {
 
             File configFile = new File(args[0]);
             if(crasherService.isCrashed()){
-                errorOutput(configFile.getParent(),crasherService);
+                errorOutput(configFile.getParent(),crasherService,CameraServiceList ,LidarServices);
             }
             else{
                 regularOutput(configFile.getParent(), StatisticalFolder.getInstance(), fusionSlamService.getFusionSlam().getLandMarks());
@@ -122,52 +137,62 @@ public class GurionRockRunner {
         try {
             FileWriter writer = new FileWriter(output);
             gson.toJson(regularOutput,writer);
+            writer.flush();
+            writer.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
     }
 
-    public static void errorOutput(String path, CrasherService crasherService){
+    public static void errorOutput(String path, CrasherService crasherService,List<CameraService> cameraServiceList,List<LiDarService> LidarServices){
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         File output = new File(path + File.separator + "output_file.json");
         String faultySensor= crasherService.getFaultySensor().getName();
         String Error = crasherService.getError();
         List<Pose> poses = crasherService.getPosesUntilCrash();
 
-        ErrorOutput errorOutput;
-        if(crasherService.getFlag()==1){
-            errorOutput = new ErrorOutputCamera(
-                    Error,
-                    faultySensor,
-                    poses,
-                    StatisticalFolder.getInstance(),
-                    ((CameraService)crasherService.getFaultySensor()).getLastFrame());
+        Map<String , List<TrackedObject>> LidarsLastFrames = new HashMap<String , List<TrackedObject>>();
+        Map<String  ,StampedDetectedObjects> CamerasLastFrames = new HashMap<String,StampedDetectedObjects>();
 
-        }else{
-            errorOutput = new ErrorOutputLidar(
-                    Error,
-                    faultySensor,
-                    poses,
-                    StatisticalFolder.getInstance(),
-                    ((LiDarService)crasherService.getFaultySensor()).getLastFrame());
+        for(CameraService c : cameraServiceList){
+            CamerasLastFrames.put(c.getName(),c.getLastFrame());
         }
 
+        for(LiDarService l : LidarServices){
+            LidarsLastFrames.put(l.getName(),l.getLastFrame());
+        }
+
+        ErrorOutput errorOutput = new ErrorOutput(
+                Error,
+                faultySensor,
+                poses,
+                StatisticalFolder.getInstance(),
+                LidarsLastFrames,
+                CamerasLastFrames
+
+        );
         try {
             FileWriter writer = new FileWriter(output);
             gson.toJson(errorOutput,writer);
+            writer.flush();
+            writer.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     private static class ErrorOutput{
+        Map<String , List<TrackedObject>> LidarsLastFrames;
+        Map<String  ,StampedDetectedObjects> CamerasLastFrames;
         private String Error;
         private String faultySensor;
         private List<Pose> poses;
         private StatisticalFolder statistics;
 
-        public ErrorOutput(String Error, String faultySensor, List<Pose> poses, StatisticalFolder statistics) {
+        public ErrorOutput(String Error, String faultySensor, List<Pose> poses, StatisticalFolder statistics ,Map<String , List<TrackedObject>> LidarsLastFrames, Map<String  ,StampedDetectedObjects> CamerasLastFrames) {
+            this.CamerasLastFrames = CamerasLastFrames;
+            this.LidarsLastFrames=LidarsLastFrames;
             this.Error = Error;
             this.faultySensor = faultySensor;
             this.poses = poses;
@@ -206,39 +231,12 @@ public class GurionRockRunner {
             this.statistics = statistics;
         }
 
-        protected ErrorOutput(){
-        }
-    }
-
-    private static class ErrorOutputCamera extends ErrorOutput{
-        private DetectedObject lastFrame;
-        public ErrorOutputCamera(String Error, String faultySensor, List<Pose> poses, StatisticalFolder statistics, DetectedObject lastFrame){
-            super(Error,faultySensor,poses,statistics);
-            this.lastFrame =lastFrame;
+        public void setCamerasLastFrames(Map<String  ,StampedDetectedObjects> camerasLastFrames) {
+            CamerasLastFrames = camerasLastFrames;
         }
 
-        public DetectedObject getLastFrame() {
-            return lastFrame;
-        }
-
-        public void setLastFrame(DetectedObject lastFrame) {
-            this.lastFrame = lastFrame;
-        }
-    }
-
-    private static class ErrorOutputLidar extends ErrorOutput{
-        private TrackedObject lastFrame;
-        public ErrorOutputLidar(String Error, String faultySensor, List<Pose> poses, StatisticalFolder statistics, TrackedObject lastFrame){
-            super(Error,faultySensor,poses,statistics);
-            this.lastFrame =lastFrame;
-        }
-
-        public TrackedObject getLastFrame() {
-            return lastFrame;
-        }
-
-        public void setLastFrame(TrackedObject lastFrame) {
-            this.lastFrame = lastFrame;
+        public void setLidarsLastFrames(Map<String , List<TrackedObject>> lidarsLastFrames) {
+            LidarsLastFrames = lidarsLastFrames;
         }
     }
 

@@ -19,6 +19,8 @@ public class Camera {
     private List<StampedDetectedObjects> cameraData;
     private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
 
+    private int maxTick;
+
     public Camera(int id, int frequency) {
         this.id = id;
         this.frequency = frequency;
@@ -62,7 +64,11 @@ public class Camera {
                     return cameraData.get(i);
                 }
             }
-
+            if(time > maxTick)
+                return null;
+            else{//we are not done with the data but in the given tick there is no data
+                StampedDetectedObjects empty = new StampedDetectedObjects(time , new ArrayList<DetectedObject>());
+            }
         }
         return null;
     }
@@ -110,5 +116,13 @@ public class Camera {
     }
     public void setDetectedObjectsList(ArrayList<StampedDetectedObjects> detctedObjectsList) {
         this.detectedObjectsList=detctedObjectsList;
+    }
+
+    public void setMaxTick(int maxTick) {
+        this.maxTick = maxTick;
+    }
+
+    public int getMaxTick() {
+        return maxTick;
     }
 }

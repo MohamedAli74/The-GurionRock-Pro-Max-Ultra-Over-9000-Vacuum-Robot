@@ -8,8 +8,6 @@ public class CloudPoint {
     private double x;
     private double y;
 
-    private double z;
-
     public CloudPoint(double x, double y){
         this.x=x;
         this.y=y;

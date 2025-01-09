@@ -119,9 +119,6 @@ public abstract class MicroService implements Runnable {
      * @param b The broadcast message to send
      */
     protected final void sendBroadcast(Broadcast b) {
-        if (b.getClass() == TerminatedBroadcast.class || b.getClass() == CrashedBroadcast.class) {
-            System.out.println(name + " sent a terminated broadcast");
-        }
         messageBus.sendBroadcast(b);
     }
 
@@ -149,14 +146,8 @@ public abstract class MicroService implements Runnable {
      * message.
      */
     protected final void terminate() {
-        System.out.println(name + " is Terminted");
         this.terminated = true;
     }
-//    GPSIMU is Terminted
-//    TimeService is Terminted
-//    Camera1 is Terminted
-//    Crasher is Terminted
-//    LiDar1 is Terminted
 
     public boolean isTerminated()
     {

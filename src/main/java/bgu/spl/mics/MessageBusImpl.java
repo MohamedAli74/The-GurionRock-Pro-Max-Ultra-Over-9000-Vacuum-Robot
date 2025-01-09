@@ -71,9 +71,6 @@ public class MessageBusImpl implements MessageBus {
 		synchronized (b.getClass()) {
 			if (broadCastSubscribers.containsKey(b.getClass())) {
 				for (MicroService m : broadCastSubscribers.get(b.getClass())) {
-//					if(m.getClass()== CameraService.class && b.getClass()== TickBroadcast.class){
-//						System.out.print(" ");
-//					}
 					BlockingQueue<Message> queue = microServicesQueues.get(m);
 					if (queue != null)
 					{

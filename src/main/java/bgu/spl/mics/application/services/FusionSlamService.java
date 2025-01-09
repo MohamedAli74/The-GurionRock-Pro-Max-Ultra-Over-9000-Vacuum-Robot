@@ -49,42 +49,42 @@ public class FusionSlamService extends MicroService {
 
         super.subscribeEvent(TrackedObjectsEvent.class, trackedObjectsEvent->
         {
-            System.out.println(trackedObjectsEvent.getTrackedObjectList().size());
-            for(TrackedObject trackedObject : trackedObjectsEvent.getTrackedObjectList())
-            {
-                LandMark landMark = fusionSlam.CheckLandMark(trackedObject);
-                if (landMark == null)
+            if(trackedObjectsEvent.getTrackedObjectList()==null){
+                sendBroadcast(new TerminatedBroadcast());
+            }else{
+                for(TrackedObject trackedObject : trackedObjectsEvent.getTrackedObjectList())
                 {
-                    if(fusionSlam.getPose(trackedObject.getTime())==null){
-                        System.out.print(" ");
+                    LandMark landMark = fusionSlam.CheckLandMark(trackedObject);
+                    if (landMark == null)
+                    {
+                        landMark = new LandMark(
+                                trackedObject.getId(),
+                                trackedObject.getDescription(),
+                                fusionSlam.convertLocalPointsToGlobalPoints(
+                                        trackedObject.getcoordinates(),
+                                        fusionSlam.getPose(trackedObject.getTime())
+                                )
+                        );
+                        fusionSlam.getLandMarks().add(landMark);
+                        fusionSlam.getStatisticalFolder().inceaseNumLandmarks(1);
                     }
-                    landMark = new LandMark(
-                            trackedObject.getId(),
-                            trackedObject.getDescription(),
-                            fusionSlam.convertLocalPointsToGlobalPoints(
-                                    trackedObject.getcoordinates(),
-                                    fusionSlam.getPose(trackedObject.getTime())
-                            )
-                    );
-                    fusionSlam.getLandMarks().add(landMark);
-                    fusionSlam.getStatisticalFolder().inceaseNumLandmarks(1);
-                }
-                else
-                {
-                    LandMark newLandMark = new LandMark(
-                            trackedObject.getId(),
-                            trackedObject.getDescription(),
-                            fusionSlam.newCoordinates(
-                                    landMark.getCoordinates(),
-                                    fusionSlam.convertLocalPointsToGlobalPoints(
-                                            trackedObject.getcoordinates(),
-                                            fusionSlam.getPose(trackedObject.getTime())
-                                    )
-                            )
-                    );
-                    fusionSlam.getLandMarks().add(newLandMark);
-                }
+                    else
+                    {
+                        LandMark newLandMark = new LandMark(
+                                trackedObject.getId(),
+                                trackedObject.getDescription(),
+                                fusionSlam.newCoordinates(
+                                        landMark.getCoordinates(),
+                                        fusionSlam.convertLocalPointsToGlobalPoints(
+                                                trackedObject.getcoordinates(),
+                                                fusionSlam.getPose(trackedObject.getTime())
+                                        )
+                                )
+                        );
+                        fusionSlam.getLandMarks().add(newLandMark);
+                    }
 
+                }
             }
         });
 

@@ -20,6 +20,8 @@ public class LiDarWorkerTracker {
     LiDarDataBase dataBase;
     private StatisticalFolder statisticalFolder = StatisticalFolder.getInstance();
 
+    private int maxTick;
+
 
     public LiDarWorkerTracker(int id, int frequency){
         this.id = id ;
@@ -57,16 +59,18 @@ public class LiDarWorkerTracker {
     }
 
     public void track(StampedDetectedObjects stampedDetectedObjects){
-        if(getStatus() == STATUS.UP){
-            List<DetectedObject> detectedObjects = stampedDetectedObjects.getDetectedObjects();
-            int count = 0;
-            for(DetectedObject detectedObject : detectedObjects){
-                TrackedObject trackedObject = searchInLiDarDataBase(detectedObject.getId(),stampedDetectedObjects.getTime());
-                trackedObject.setDescription(detectedObject.getDescription());
-                lastTrackedObjects.add(trackedObject);
-                count++;
+        if(getStatus() == STATUS.UP) {
+            if (stampedDetectedObjects.getDetectedObjects().size() != 0) {
+                List<DetectedObject> detectedObjects = stampedDetectedObjects.getDetectedObjects();
+                int count = 0;
+                for (DetectedObject detectedObject : detectedObjects) {
+                    TrackedObject trackedObject = searchInLiDarDataBase(detectedObject.getId(), stampedDetectedObjects.getTime());
+                    trackedObject.setDescription(detectedObject.getDescription());
+                    lastTrackedObjects.add(trackedObject);
+                    count++;
+                }
+                statisticalFolder.inceaseNumTrackedObjects(count);
             }
-            statisticalFolder.inceaseNumTrackedObjects(count);
         }
     }
 
@@ -110,5 +114,13 @@ public class LiDarWorkerTracker {
 
     public void StatisticalFolder() {
        this.statisticalFolder = StatisticalFolder.getInstance();
+    }
+
+    public void setMaxTick(int maxTick){
+        this.maxTick= maxTick;
+    }
+
+    public int getMaxTick() {
+        return maxTick;
     }
 }

@@ -21,6 +21,7 @@ import java.util.List;
  */
 public class LiDarService extends MicroService {
     private LiDarWorkerTracker liDar;
+    private List<TrackedObject> LastFrame;
     /**
      * Constructor for LiDarService.
      *
@@ -61,27 +62,34 @@ public class LiDarService extends MicroService {
         super.subscribeBroadcast(TickBroadcast.class, tickBroadcast ->
         {
             int currentTime = tickBroadcast.getCurrentTick();
-            if(liDar.checkERROR(currentTime)){
-                CrashedBroadcast crashedBroadcast = liDar.getCrashedbroadcast(tickBroadcast.getCurrentTick(),this);
-                sendBroadcast(crashedBroadcast);
-            }
-            List<TrackedObject> willSend = new ArrayList<>();
-            for (TrackedObject obj : liDar.getLastTrackedObjects())
-            {
-                if(obj.getTime() <= currentTime - liDar.getFrequency() && !obj.isSentBefore())
-                {
-                    obj.setSentBefore(true);
-                    willSend.add(obj);
+            if(currentTime<=liDar.getMaxTick() + liDar.getFrequency()) {
+                if (liDar.checkERROR(currentTime)) {
+                    CrashedBroadcast crashedBroadcast = liDar.getCrashedbroadcast(tickBroadcast.getCurrentTick(), this);
+                    sendBroadcast(crashedBroadcast);
                 }
+                List<TrackedObject> willSend = new ArrayList<>();
+                for (TrackedObject obj : liDar.getLastTrackedObjects()) {
+                    if (obj.getTime() <= currentTime - liDar.getFrequency() && !obj.isSentBefore()) {
+                        obj.setSentBefore(true);
+                        willSend.add(obj);
+                    }
+                }
+                TrackedObjectsEvent trackEvent = new TrackedObjectsEvent(willSend);
+                setLastFrame(willSend);
+                Future<Boolean> future = super.sendEvent(trackEvent);
             }
-            TrackedObjectsEvent trackEvent = new TrackedObjectsEvent(willSend);
-            Future<Boolean> future = super.sendEvent(trackEvent);
-
+            else{
+                sendEvent(new TrackedObjectsEvent(null));
+            }
         });
 
     }
 
-    public TrackedObject getLastFrame() {
-        return liDar.getLastFrame();
+    private void setLastFrame(List<TrackedObject> LastFrame) {
+        this.LastFrame=LastFrame;
+    }
+
+    public List<TrackedObject> getLastFrame() {
+        return LastFrame;
     }
 }

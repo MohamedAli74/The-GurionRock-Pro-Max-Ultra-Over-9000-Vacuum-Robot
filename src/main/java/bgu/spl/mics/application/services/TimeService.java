@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.CrashedBroadcast;
 import bgu.spl.mics.application.messages.TerminatedBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.objects.StatisticalFolder;
@@ -40,6 +41,10 @@ public class TimeService extends MicroService {
     protected void initialize() {
        super.messageBus.register(this);
        super.subscribeBroadcast(TerminatedBroadcast.class, terminatedBroadcast ->
+       {
+           terminate();
+       });
+       super.subscribeBroadcast(CrashedBroadcast.class, crashedBroadcast ->
        {
            terminate();
        });

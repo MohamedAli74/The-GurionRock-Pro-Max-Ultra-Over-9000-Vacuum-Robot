@@ -21,7 +21,7 @@ import bgu.spl.mics.application.objects.StampedDetectedObjects;
 public class CameraService extends MicroService {
 
     private final Camera camera;
-    private DetectedObject lastFrame;
+    private StampedDetectedObjects lastFrame;
     /**
      * Constructor for CameraService.
      *
@@ -61,22 +61,25 @@ public class CameraService extends MicroService {
             StampedDetectedObjects detectedObjects = this.camera.detect(tickBroadcast.getCurrentTick()-camera.getFrequency());
             if(detectedObjects!=null) {
                 if (detectedObjects.getDetectedObjects() != null && detectedObjects.getDetectedObjects().size()!=0) {
-                    setLastFrame(detectedObjects.getDetectedObjects().get(detectedObjects.getDetectedObjects().size()-1));
+                    setLastFrame(detectedObjects);
+                    this.sendEvent(new DetectObjectsEvent(detectedObjects));
+                }
+                else{
                     this.sendEvent(new DetectObjectsEvent(detectedObjects));
                 }
             }
             else{
-                System.out.println("entered the else");
+
             }
         });
 
     }
 
-    public void setLastFrame(DetectedObject lastFrame) {
+    public void setLastFrame(StampedDetectedObjects lastFrame) {
         this.lastFrame = lastFrame;
     }
 
-    public DetectedObject getLastFrame() {
+    public StampedDetectedObjects getLastFrame() {
         return lastFrame;
     }
 }
