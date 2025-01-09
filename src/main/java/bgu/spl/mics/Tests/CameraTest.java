@@ -1,4 +1,4 @@
-package Tests;
+package bgu.spl.mics.Tests;
 import bgu.spl.mics.application.objects.*;
 import org.junit.Test;
 import java.util.ArrayList;
@@ -9,8 +9,8 @@ import static org.junit.Assert.assertNotNull;
 
 public class CameraTest
 {
-   @Test
-   public void statusErrorTest()
+    @Test
+    public void statusErrorTest()
     {
         Camera camera = new Camera(1,1);
         camera.setStatus(STATUS.ERROR);

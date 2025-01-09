@@ -13,5 +13,4 @@ public class FusionSlamToCrasherEvent implements Event {
     public Pose getCurrentPose(){
         return currentPose;
     }
-
 }

@@ -1,4 +1,4 @@
-package Tests;
+package bgu.spl.mics.Tests;
 
 import bgu.spl.mics.*;
 import bgu.spl.mics.example.messages.ExampleBroadcast;
@@ -182,14 +182,5 @@ public class MessageBusTest {
         assertNotNull(messageBus.getMicroServicesQueues().get(microservice1));
         messageBus.unregister(microservice);
         messageBus.unregister(microservice1);
-
-
-
-
-
-
-
-
     }
 }
-

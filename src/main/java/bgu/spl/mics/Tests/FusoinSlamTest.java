@@ -1,4 +1,4 @@
-package Tests;
+package bgu.spl.mics.Tests;
 
 import bgu.spl.mics.application.objects.*;
 import org.junit.Test;
@@ -46,6 +46,31 @@ public class FusoinSlamTest {
         assertTrue("landMark must be in the list ",fusionSlam.getLandMarks().contains(landMark));
         assertEquals("the id must be the same ",landMark.getId(),object.getId());
         assertEquals("the description must be the same ",landMark.getDescription(),object.getDescription());
+
+    }
+    @Test
+    public void prevLandMarkTest()
+    {
+        FusionSlam fusionSlam = FusionSlam.getInstance();
+        float x = 3.5f;
+        float y = 1.0f;
+        float yaw = 77.0f;
+        Pose pose = new Pose(x,y,yaw,1);
+        CloudPoint cloudPoint = new CloudPoint(2.5,3.0);
+        List<CloudPoint> cloudPointList = new ArrayList<>();
+        cloudPointList.add(cloudPoint);
+        TrackedObject trackedObject = new TrackedObject("1",5,"a",cloudPointList);
+        CloudPoint cloudPoint1 = new CloudPoint(9.5,2.0);
+        List<CloudPoint> cloudPointList1 = new ArrayList<>();
+        cloudPointList1.add(cloudPoint1);
+        LandMark landMark = new LandMark("1","a",cloudPointList1);
+        fusionSlam.getLandMarks().add(landMark);
+        List<CloudPoint> convertedToLandMark = fusionSlam.convertLocalPointsToGlobalPoints(cloudPointList,pose);
+        List<CloudPoint> outputList = fusionSlam.newCoordinates(cloudPointList1,convertedToLandMark);
+        assertNotNull("output must not be null ",outputList);
+        assertEquals("outpust's x must be equal to the average of x coordinates ",outputList.get(0).getX(),(cloudPoint1.getX()+convertedToLandMark.get(0).getX()/2.0));
+        assertEquals("outpust's y must be equal to the average of y coordinates", outputList.get(0).getY(),(cloudPoint1.getY()+convertedToLandMark.get(0).getY()/2.0));
+
 
     }
 }
